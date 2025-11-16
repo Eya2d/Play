@@ -8,10 +8,7 @@
 
     <style>
 body {
-    width: 100%;
-    height: 100vh;
     margin: 0;
-    padding: 0;
     overflow: hidden;
     background: #122759;
     box-shadow: 0px 16px 33px #1f469f inset;
@@ -132,35 +129,21 @@ body #hearts {
 
 
 @media (max-width: 768px) {
-
-    #plane {
-        width: 60px; /* حجم أنسب للجوال */
-        bottom: 25px;
-    }
-
-    #game {
-        touch-action: none; /* يمنع التمرير في الصفحة أثناء اللمس */
-    }
-
     .pauseBtn {
         padding: 6px 14px;
         height: max-content;
     }
-
     #time {
         margin-top: 5px;
         margin-left: 0;
     }
-
     .score {
         font-size: 16px;
         width: max-content;
     }
-
     body #hearts {
         direction: ltr;
     }
-
     #hearts img {
         width: 25px;
     }
@@ -206,16 +189,18 @@ document.getElementById("hud").appendChild(pauseBtn);
 let hearts = 7;
 // 🟢 عدد النقاط
 let score = 0;
-// عداد الأهداف
+// عداد الأهداف التي ظهرت
 let spawnedCount = 0;
 // حالة اللعبة
 let paused = false;
-// الوقت
+// الوقت بالثواني
 let timeLeft = 150;
 
+// عرض القلوب
 function updateHearts() {
     heartsDiv.innerHTML = "";
-    for (let i = 0; i < 7; i++) {
+    const totalHearts = 7;
+    for (let i = 0; i < totalHearts; i++) {
         const h = document.createElement("img");
         h.src = "image/heart.png";
         if (i >= hearts) h.style.filter = "contrast(0.4)";
@@ -244,26 +229,23 @@ function autoShoot() {
 
 function shoot() {
     const rect = plane.getBoundingClientRect();
-    const left = document.createElement("img");
-    left.src = "image/bullets.png";
-    left.className = "bullet";
-    left.style.left = (rect.left + 10) + "px";
-    left.style.bottom = "80px";
-
-    const right = document.createElement("img");
-    right.src = "image/bullets.png";
-    right.className = "bullet";
-    right.style.left = (rect.right - 20) + "px";
-    right.style.bottom = "80px";
-
-    game.appendChild(left);
-    game.appendChild(right);
-    bullets.push(left, right);
+    const leftBullet = document.createElement("img");
+    leftBullet.src = "image/bullets.png";
+    leftBullet.className = "bullet";
+    leftBullet.style.left = (rect.left + 10) + "px";
+    leftBullet.style.bottom = "80px";
+    const rightBullet = document.createElement("img");
+    rightBullet.src = "image/bullets.png";
+    rightBullet.className = "bullet";
+    rightBullet.style.left = (rect.right - 20) + "px";
+    rightBullet.style.bottom = "80px";
+    game.appendChild(leftBullet);
+    game.appendChild(rightBullet);
+    bullets.push(leftBullet, rightBullet);
 }
 
 function spawnEnemy() {
     if (paused) return;
-
     const enemy = document.createElement("img");
     enemy.src = "image/Goals.png";
     enemy.className = "enemy";
@@ -271,7 +253,6 @@ function spawnEnemy() {
     enemy.style.left = Math.random() * (window.innerWidth - 60) + "px";
     game.appendChild(enemy);
     enemies.push(enemy);
-
     spawnedCount++;
     if (spawnedCount % 15 === 0) {
         const heart = document.createElement("img");
@@ -294,6 +275,7 @@ function explode(x, y) {
     setTimeout(() => boom.remove(), 300);
 }
 
+// 🔹 إيقاف اللعبة وعرض النتيجة على أساس عدد الأهداف
 function endGame() {
     paused = true;
     finalScore.textContent = `النتيجة: ${score} / 100`;
@@ -314,37 +296,32 @@ function resetGame() {
     spawnedCount = 0;
     timeLeft = 150;
     scoreDiv.textContent = "النتيجة: 0";
-
     updateHearts();
     enemies.forEach(e => e.remove());
-    bullets.forEach(b => b.remove());
     heartsOnScreen.forEach(h => h.remove());
-
+    bullets.forEach(b => b.remove());
     enemies = [];
-    bullets = [];
     heartsOnScreen = [];
+    bullets = [];
     paused = false;
-
     pauseBtn.textContent = "⏸ إيقاف";
     planeX = window.innerWidth / 2;
     plane.style.left = planeX + "px";
     resultScreen.style.display = "none";
 }
 
+// 🔹 زر الإيقاف المؤقت
 pauseBtn.addEventListener("click", () => {
     paused = !paused;
     pauseBtn.textContent = paused ? "▶ استئناف" : "⏸ إيقاف";
 });
 
-// إيقاف عند الخروج من الصفحة
 document.addEventListener("visibilitychange", () => {
     if (document.hidden) {
         paused = true;
         pauseBtn.textContent = "▶ استئناف";
     }
 });
-
-// زر الإدخال لإيقاف اللعبة
 document.addEventListener("keydown", e => {
     if (e.key === "Enter") {
         paused = !paused;
@@ -352,11 +329,12 @@ document.addEventListener("keydown", e => {
     }
 });
 
-
 // ===============================
 //   🔥 تحريك الطائرة باللمس للهاتف
+//   يعمل فقط تحت 768px
 // ===============================
 if (window.innerWidth <= 768) {
+
     let touchStartX = 0;
 
     game.addEventListener("touchstart", (e) => {
@@ -369,7 +347,7 @@ if (window.innerWidth <= 768) {
         let touchX = e.touches[0].clientX;
         let moveX = touchX - touchStartX;
 
-        planeX += moveX * 0.5; 
+        planeX += moveX * 0.5; // حساسية الحركة
         touchStartX = touchX;
 
         if (planeX < 0) planeX = 0;
@@ -380,12 +358,9 @@ if (window.innerWidth <= 768) {
 }
 
 
-// ===============================
-//      🔄 لوب اللعبة
-// ===============================
+// لوب اللعبة
 function gameLoop() {
     if (!paused) {
-
         if (keys["ArrowLeft"]) planeX -= 7;
         if (keys["ArrowRight"]) planeX += 7;
 
@@ -406,7 +381,6 @@ function gameLoop() {
 
         enemies.forEach((e, i) => {
             e.style.top = parseInt(e.style.top) + 3 + "px";
-
             if (parseInt(e.style.top) > window.innerHeight) {
                 e.remove();
                 enemies.splice(i, 1);
@@ -418,17 +392,11 @@ function gameLoop() {
             bullets.forEach((b, j) => {
                 const bRect = b.getBoundingClientRect();
                 const eRect = e.getBoundingClientRect();
-
-                if (
-                    bRect.left < eRect.right &&
-                    bRect.right > eRect.left &&
-                    bRect.top < eRect.bottom &&
-                    bRect.bottom > eRect.top
-                ) {
+                if (bRect.left < eRect.right && bRect.right > eRect.left &&
+                    bRect.top < eRect.bottom && bRect.bottom > eRect.top) {
                     explode(eRect.left, eRect.top);
                     score++;
                     scoreDiv.textContent = "النتيجة: " + score;
-
                     e.remove();
                     b.remove();
                     enemies.splice(i, 1);
@@ -439,25 +407,17 @@ function gameLoop() {
 
         heartsOnScreen.forEach((h, k) => {
             h.style.top = parseInt(h.style.top) + 3 + "px";
-
             if (parseInt(h.style.top) > window.innerHeight) {
                 h.remove();
                 heartsOnScreen.splice(k, 1);
             }
-
             bullets.forEach((b, j) => {
                 const bRect = b.getBoundingClientRect();
                 const hRect = h.getBoundingClientRect();
-
-                if (
-                    bRect.left < hRect.right &&
-                    bRect.right > hRect.left &&
-                    bRect.top < hRect.bottom &&
-                    bRect.bottom > hRect.top
-                ) {
+                if (bRect.left < hRect.right && bRect.right > hRect.left &&
+                    bRect.top < hRect.bottom && bRect.bottom > hRect.top) {
                     if (hearts < 7) hearts++;
                     updateHearts();
-
                     h.remove();
                     b.remove();
                     heartsOnScreen.splice(k, 1);
@@ -466,14 +426,11 @@ function gameLoop() {
             });
         });
     }
-
     requestAnimationFrame(gameLoop);
 }
 
-// ===============================
-//   ⏳ عداد الوقت
-// ===============================
-let timer = setInterval(() => {
+// العد التنازلي للوقت
+const timer = setInterval(() => {
     if (!paused) {
         timeLeft--;
         timeDiv.textContent = `${timeLeft} :الوقت`;
@@ -488,8 +445,7 @@ restartBtn.addEventListener("click", () => {
     resetGame();
     clearInterval(timer);
     timeLeft = 150;
-
-    timer = setInterval(() => {
+    setInterval(() => {
         if (!paused) {
             timeLeft--;
             timeDiv.textContent = `${timeLeft} :الوقت`;
@@ -501,6 +457,7 @@ restartBtn.addEventListener("click", () => {
     }, 1000);
 });
 
+// بدء اللعبة
 setInterval(spawnEnemy, 1500);
 gameLoop();
     </script>
