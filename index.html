@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <title>لعبة الطائرة</title>
+    <link rel="icon" href="image/logo.png">
+    <link rel="stylesheet" href="style.css">
+    <script type="module" src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.esm.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/Eya2d/Wave-cloud/wave-cloud.js"></script>
+
+</head>
+<body>
+   
+    <div class="resultScfr" id="storeScreen"> <!-- المتجر -->
+        <div class="Close-div Wave-center" id="closeStoreBtn"><ion-icon name="close-outline"></ion-icon></div>
+        <div class="resultScfr-div">
+            <div class="resultScfr-1203">
+                <div class="flex"><img src="image/mone.png" alt=""> <span id="coinsDisplay">1000</span></div> <!-- عدد العمل يتم احتساب العمل على حسب الاهداف ابتي اصابه المستخدم اثناء اللعب -->
+                    <div class="flex Wave-all xxrw">
+                        <button id="giftsTab"><img src="image/Gift2.png" alt=""></button> <!-- إظهار قسم الهدايا -->
+                        <button id="backgroundsTab"><img src="image/img3.png" alt=""></button> <!-- إظهار قسم الخلفيات -->
+                        <button id="planesTab" class="checked"><img src="image/Airplane/airplane1.png" alt=""></button> <!-- إظهار قسم الطائرات -->
+                    </div>  <!-- يضاف كلاس checked لزر الديف الظاهر -->
+                <xxd>المتجر</xxd>
+            </div>
+            <!-- سيتم إنشاء محتوى الطائرات ديناميكياً -->
+            <div class="resultScfr-sho resultScfr-sho2" id="planesSection"></div>
+
+            <!-- سيتم إنشاء محتوى الخلفيات ديناميكياً -->
+            <div class="resultScfr-sho2 sho3" id="backgroundsSection"></div>
+            
+            <!-- سيتم إنشاء محتوى الهدايا ديناميكياً -->
+            <div class="resultScfr-sho2 sho3" id="giftsSection"></div>
+        </div>
+    </div>
+
+
+    <div class="resultScfr" id="settingsScreen"> <!-- ديف الإعدادات -->
+        <div class="Close-div Wave-center" id="closeSettingsBtn"><ion-icon name="close-outline"></ion-icon></div>
+        <div class="resultScfr-div">
+            <div class="resultScfr-1203">
+                <div class="flex">
+                    <button class="pauseBtn Wave-cloud" id="copyRestoreLinkBtn" style="margin-right: 10px;">نسخ رابط الإستعادة</button> <!-- زر نسخ شفرة قوية مكونة من ارقام واحرف يتم حفظ جميع تقدم المستخدم بها من اشياء اشتراها امواله -->
+                    <button class="pauseBtn Wave-cloud" title="شارك مع من تحب"><ion-icon name="share-social-outline"></ion-icon></button>
+                </div>
+                
+                <xxd>الإعدادات</xxd>
+            </div>
+            <div class="setin">
+                <label>إطلاق الزخيرة أوتوماتيك <input type="checkbox" id="autoShootCheckbox" checked></label>
+                <label>تفعيل حركة الأسهم أعلى ▲ وأسفل ▼ <input type="checkbox" id="verticalMovementCheckbox"></label> <!-- تفعيل تفعيل حركة الأسهم أعلى ▲ وأسفل ▼ -->
+                <label>دوران الطائرة أثناء التحرك يمين ويسار <input type="checkbox" id="planeRotationCheckbox"></label> <!-- تفعيل دوران الطائرة أثناء التحرك يمين ويسار  -->
+                <div>بدء اللعبة من جديد <button class="pauseBtn Wave-cloud" id="resetDataBtn">حذف الذاكرة</button></div>
+                <div class="sound-control">
+                    <span>صوت الخلفية:</span>
+                    <input type="range" id="backgroundVolume" min="0" max="100" value="50">
+                    <span id="backgroundVolumeValue">50%</span>
+                </div>
+                <div class="sound-control">
+                    <span>صوت التأثيرات:</span>
+                    <input type="range" id="effectsVolume" min="0" max="100" value="70">
+                    <span id="effectsVolumeValue">70%</span>
+                </div>
+                <div class="sound-control">
+                    <span>صوت الطلقات:</span>
+                    <input type="range" id="shootVolume" min="0" max="100" value="80">
+                    <span id="shootVolumeValue">80%</span>
+                </div>
+                <label>مقابل كل هدف يتم اصابته تحصل على 10 عملات</label>
+                <label>للإطلاق اليدوي اضغط على زر المسافة (Space)</label>
+                <label>
+                    إن إستطعت أن تحرز 50 هدفا قبل إنتهاء نصف الوقت ستحصل على هدية
+                    <img src="image/clock.png" style="margin-left: 11px; height: 34px;" title="زيادة الوقت 20 ثانية"> 
+                    أو 
+                    <img src="image/Bomb.png" title="تفجير 5 أهداف"> 
+                    أو 
+                    <img src="image/target.png" title="ملاحقة الطلقات لاول 7 أهداف"> 
+                    أو 
+                    <img src="image/heart.png" title="الحصول على قلبين">
+                </label>
+                <!-- ------- -->
+                <div class="restoreLinkInput"><input type="text" class="ccdde" id="restoreLinkInput" placeholder="رابط الإستعادة الصقه هنا:"> <button class="pauseBtn Wave-cloud" id="restoreDataBtn">إستعادة</button></div>  <!-- عند لصقه هنا والنقر على زر استعداة من اي جهاز او متصفح يتم الاستعادة -->
+            </div>
+        </div>
+    </div>
+    
+    <!-- إشعار نسخ الرابط -->
+    <div class="notification" id="notification">تم نسخ رابط الاستعادة</div>
+    
+    <div id="game" class="Wave-all">
+        <div id="hud">
+            <div id="hearts"></div>
+            <div class="fgfgtryyy">
+                <div class="score" id="score">النتيجة: 0</div>
+                <div class="score" id="time">150 :الوقت</div>
+            </div>
+            <div class="store-div-001 flex">
+                <button class="pauseBtn" id="Store" title="المتجر"><img src="image/store.png" alt=""></button> <!-- زر اظهار المتجر واخفائه -->
+                <button class="pauseBtn" id="Setting" title="الإعدادت"><img src="image/Setting.png" alt=""></button> <!-- زر اظهار ديف الإعدادت -->
+                <button class="pauseBtn" id="refreshBtn"><img src="image/refresh.png" alt="" style="filter: drop-shadow(0px 0px 1px #fff);"></button> <!-- زر إعادة الدور مع الحفاظ على العملات التي حصر عليه المستخدم من الدور -->
+            </div>
+        </div>
+        <img id="plane" src="image/Airplane/airplane1.png">
+        <div id="resultScreen" class="resultScfr">
+            <!-- <div class="Close-div Wave-center"><ion-icon name="close-outline"></ion-icon></div> -->
+            <div id="finalScore"></div>
+            <div id="finalHearts"></div>
+            <button id="restartBtn" class="pauseBtn">إعادة اللعبة</button>
+        </div>
+    </div>
+
+    <!-- نافذة تأكيد حذف الذاكرة -->
+    <div class="resultScfr" id="deleteMemoryScreen" style="display: none;backdrop-filter: none;">
+        <div class="Close-div Wave-center" id="closeDeleteMemoryBtn"><ion-icon name="close-outline"></ion-icon></div>
+        <div class="resultScfr-div" style="box-shadow: none;">
+            <div class="resultScfr-1203">
+                <div class="flex"><input type="checkbox" id="selectAllCheckbox" checked></div> <!-- تحديد الكل -->
+                <xxd>الإعدادات > <span style="opacity: .7;">حذف الذاكرة</span></xxd>
+            </div>
+            <div class="setin Wave-all">
+                <label> حذف المال <input type="checkbox" id="deleteCoins" class="deleteOption" checked></label>
+                <label> حذف مشترياتي في قسم الطائرات <input type="checkbox" id="deletePlanes" class="deleteOption" checked></label>
+                <label> حذف مشترياتي في قسم الخلفيات <input type="checkbox" id="deleteBackgrounds" class="deleteOption" checked></label>
+                <!-- إضافة الخانة الجديدة -->
+                <label> حذف مشترياتي في قسم الهدايا <input type="checkbox" id="deleteGifts" class="deleteOption" checked></label>
+                <div><button class="pauseBtn" id="confirmDeleteBtn">حذف الذاكرة</button></div>
+            </div>
+        </div>
+    </div>
+
+    <script src="script dtat.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>
