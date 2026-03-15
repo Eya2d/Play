@@ -589,6 +589,18 @@ xxd label {
     button,div,a,span {
         -webkit-tap-highlight-color: transparent;
     }
+    #refreshBtn:hover img {
+        transform: none;
+    }
+    #Setting:hover img {
+        transform: none;
+    }
+    #refreshBtn:active img {
+        transform: rotate(16deg);
+    }
+    #Setting:active img {
+        transform: rotate(23deg);
+    }
 }
 
 @media (max-width: 800px) {
