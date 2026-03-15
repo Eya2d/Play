@@ -5,12 +5,14 @@
 let availableGifts = []; // الهدايا التي تم شراؤها وجاهزة للتفعيل العشوائي
 let giftActiveInGame = false; // هل هناك هدية نشطة حالياً في اللعبة؟
 
-// دالة لإنشاء عناصر الطائرات
-function createPlanesSection() {
+// دالة لإنشاء عناصر الطائرات مع تأخير
+async function createPlanesSection() {
     const planesSection = document.getElementById("planesSection");
     planesSection.innerHTML = '';
+    planesSection.style.display = "flex";
     
-    planesData.forEach((planeData, index) => {
+    for (let index = 0; index < planesData.length; index++) {
+        const planeData = planesData[index];
         const planeDiv = document.createElement("div");
         planeDiv.className = "Wave-cloud";
         if (index === 0) planeDiv.classList.add("check");
@@ -28,15 +30,21 @@ function createPlanesSection() {
         `;
         
         planesSection.appendChild(planeDiv);
-    });
+        await new Promise(resolve => setTimeout(resolve, 1)); // تأخير 1 ملي ثانية
+    }
+    
+    addPlaneEventListeners();
+    updateStoreDisplay();
 }
 
-// دالة لإنشاء عناصر الخلفيات
-function createBackgroundsSection() {
+// دالة لإنشاء عناصر الخلفيات مع تأخير
+async function createBackgroundsSection() {
     const backgroundsSection = document.getElementById("backgroundsSection");
     backgroundsSection.innerHTML = '';
+    backgroundsSection.style.display = "flex";
     
-    backgroundsData.forEach((bgData, index) => {
+    for (let index = 0; index < backgroundsData.length; index++) {
+        const bgData = backgroundsData[index];
         const bgDiv = document.createElement("div");
         bgDiv.className = "Wave-cloud";
         if (index === 0) {
@@ -54,15 +62,21 @@ function createBackgroundsSection() {
         `;
         
         backgroundsSection.appendChild(bgDiv);
-    });
+        await new Promise(resolve => setTimeout(resolve, 1)); // تأخير 1 ملي ثانية
+    }
+    
+    addBackgroundEventListeners();
+    updateBackgroundDisplay();
 }
 
-// دالة لإنشاء عناصر الهدايا
-function createGiftsSection() {
+// دالة لإنشاء عناصر الهدايا مع تأخير
+async function createGiftsSection() {
     const giftsSection = document.getElementById("giftsSection");
     giftsSection.innerHTML = '';
+    giftsSection.style.display = "flex";
     
-    giftsData.forEach((giftData, index) => {
+    for (let index = 0; index < giftsData.length; index++) {
+        const giftData = giftsData[index];
         const giftDiv = document.createElement("div");
         giftDiv.className = "Wave-cloud";
         
@@ -76,7 +90,11 @@ function createGiftsSection() {
         `;
         
         giftsSection.appendChild(giftDiv);
-    });
+        await new Promise(resolve => setTimeout(resolve, 1)); // تأخير 1 ملي ثانية
+    }
+    
+    addGiftEventListeners();
+    updateGiftsDisplay();
 }
 
 // دالة تحديث عرض الهدايا في المتجر
@@ -346,14 +364,12 @@ function showNotification(message) {
     }, 2000);
 }
 
-// استدعاء الدوال لإنشاء الأقسام
+// استدعاء الدوال لإنشاء الأقسام - معدل: لا يتم تحميل أي محتوى في البداية
 document.addEventListener('DOMContentLoaded', function() {
-    createPlanesSection();
-    createBackgroundsSection();
-    createGiftsSection();
-    addPlaneEventListeners();
-    addBackgroundEventListeners();
-    addGiftEventListeners();
+    // إخفاء جميع الأقسام في البداية
+    planesSection.style.display = "none";
+    backgroundsSection.style.display = "none";
+    giftsSection.style.display = "none";
     
     // التأكد من أن اللعبة متوقفة في البداية
     paused = true;
@@ -490,6 +506,16 @@ const deleteBackgroundsCheckbox = document.getElementById("deleteBackgrounds");
 const deleteGiftsCheckbox = document.getElementById("deleteGifts");
 const confirmDeleteBtn = document.getElementById("confirmDeleteBtn");
 
+// ===============================
+// 🔄 نظام إدارة الشاشات (جديد)
+// ===============================
+function hideAllScreens() {
+    storeScreen.style.display = "none";
+    settingsScreen.style.display = "none";
+    deleteMemoryScreen.style.display = "none";
+    resultScreen.style.display = "none";
+}
+
 // تحميل البيانات المحفوظة (مُعدل)
 // تحميل البيانات المحفوظة (معدل لدعم GIF)
 function loadGameData() {
@@ -533,10 +559,7 @@ function loadGameData() {
         
         console.log("الهدايا المتاحة بعد التحميل:", availableGifts);
         
-        // تحديث المتجر
-        updateStoreDisplay();
-        updateBackgroundDisplay();
-        updateGiftsDisplay();
+        // تحديث العملات فقط - لا نقوم بتحديث الأقسام لأنها لم تظهر بعد
         updateCoinsDisplay();
         
         // تحديث الإعدادات
@@ -802,9 +825,25 @@ if (window.innerWidth <= 768) {
         clearInterval(shootInterval);
     });
 }
+
 // ===============================
-// 🛒 وظائف المتجر
+// 🛒 وظائف المتجر (معدلة بالكامل)
 // ===============================
+
+// دالة مساعدة لإخفاء جميع الأقسام
+function hideAllStoreSections() {
+    planesSection.style.display = "none";
+    backgroundsSection.style.display = "none";
+    giftsSection.style.display = "none";
+}
+
+// دالة مساعدة لإفراغ جميع الأقسام
+function clearAllStoreSections() {
+    planesSection.innerHTML = '';
+    backgroundsSection.innerHTML = '';
+    giftsSection.innerHTML = '';
+}
+
 // تحديث عرض المتجر
 function updateStoreDisplay() {
     const planeItems = document.querySelectorAll("#planesSection .Wave-cloud");
@@ -839,6 +878,7 @@ function updateStoreDisplay() {
         }
     });
 }
+
 // تحديث عرض الخلفيات
 function updateBackgroundDisplay() {
     const bgItems = document.querySelectorAll("#backgroundsSection .Wave-cloud");
@@ -873,6 +913,7 @@ function updateBackgroundDisplay() {
         }
     });
 }
+
 // تطبيق الخلفية
 function applyBackground(bgName) {
     if (bgName === "default") {
@@ -913,26 +954,41 @@ function applyBackground(bgName) {
         game.style.boxShadow = "none";
     }
 }
-// فتح المتجر
-storeBtn.addEventListener("click", () => {
+
+// فتح المتجر (معدل) - مع تحميل المحتوى من جديد
+storeBtn.addEventListener("click", async () => {
+    hideAllScreens();
     storeScreen.style.display = "flex";
     paused = true;
     pauseBtn.textContent = "▶ استئناف";
     updateCoinsDisplay();
-    updateStoreDisplay();
-    updateBackgroundDisplay();
-    updateGiftsDisplay();
+    
+    // إفراغ وإخفاء جميع الأقسام أولاً
+    clearAllStoreSections();
+    hideAllStoreSections();
+    
+    // عرض قسم الطائرات افتراضياً
+    planesTab.classList.add("checked");
+    backgroundsTab.classList.remove("checked");
+    giftsTab.classList.remove("checked");
+    
+    // تحميل قسم الطائرات من جديد
+    await createPlanesSection();
 });
-// إغلاق المتجر - لا يتم استئناف اللعبة تلقائيًا
+
+// إغلاق المتجر - مع إفراغ جميع الأقسام
 closeStoreBtn.addEventListener("click", () => {
     storeScreen.style.display = "none";
+    clearAllStoreSections(); // إفراغ جميع الأقسام عند إغلاق المتجر
+    hideAllStoreSections();
     // لا نقوم بتغيير حالة paused هنا، يبقى على المستخدم النقر على زر الإيقاف
 });
+
 // تحديث عرض العملات
 function updateCoinsDisplay() {
     coinsDisplay.textContent = coins;
 }
-// شراء طائرة جديدة
+
 // شراء طائرة جديدة (معدلة لدعم GIF)
 function addPlaneEventListeners() {
     const planeItems = document.querySelectorAll("#planesSection .Wave-cloud");
@@ -1047,42 +1103,66 @@ function addBackgroundEventListeners() {
         });
     });
 }
-// التبديل بين قسم الطائرات والخلفيات والهدايا
-planesTab.addEventListener("click", () => {
-    planesSection.style.display = "flex";
+
+// التبديل بين قسم الطائرات والخلفيات والهدايا - مع تحميل المحتوى من جديد في كل مرة
+planesTab.addEventListener("click", async () => {
+    // إخفاء الأقسام الأخرى
     backgroundsSection.style.display = "none";
     giftsSection.style.display = "none";
+    
+    // تحديث حالة التبويبات
     planesTab.classList.add("checked");
     backgroundsTab.classList.remove("checked");
     giftsTab.classList.remove("checked");
+    
+    // إفراغ وإعادة تحميل قسم الطائرات من جديد
+    planesSection.innerHTML = '';
+    await createPlanesSection();
 });
-backgroundsTab.addEventListener("click", () => {
+
+backgroundsTab.addEventListener("click", async () => {
+    // إخفاء الأقسام الأخرى
     planesSection.style.display = "none";
-    backgroundsSection.style.display = "flex";
     giftsSection.style.display = "none";
+    
+    // تحديث حالة التبويبات
     planesTab.classList.remove("checked");
     backgroundsTab.classList.add("checked");
     giftsTab.classList.remove("checked");
+    
+    // إفراغ وإعادة تحميل قسم الخلفيات من جديد
+    backgroundsSection.innerHTML = '';
+    await createBackgroundsSection();
 });
-giftsTab.addEventListener("click", () => {
+
+giftsTab.addEventListener("click", async () => {
+    // إخفاء الأقسام الأخرى
     planesSection.style.display = "none";
     backgroundsSection.style.display = "none";
-    giftsSection.style.display = "flex";
+    
+    // تحديث حالة التبويبات
     planesTab.classList.remove("checked");
     backgroundsTab.classList.remove("checked");
     giftsTab.classList.add("checked");
+    
+    // إفراغ وإعادة تحميل قسم الهدايا من جديد
+    giftsSection.innerHTML = '';
+    await createGiftsSection();
 });
+
 // زيادة العملات عند إصابة الهدف
 function addCoins(amount) {
     coins += amount;
     updateCoinsDisplay();
     saveGameData(); // حفظ البيانات بعد كل زيادة في العملات
 }
+
 // ===============================
 // ⚙️ وظائف الإعدادات الجديدة
 // ===============================
-// فتح شاشة الإعدادات
+// فتح شاشة الإعدادات (معدل)
 settingsBtn.addEventListener("click", () => {
+    hideAllScreens();
     settingsScreen.style.display = "flex";
     paused = true;
     pauseBtn.textContent = "▶ استئناف";
@@ -1120,8 +1200,9 @@ planeRotationCheckbox.addEventListener("change", function() {
 // ===============================
 // 🗑️ وظائف نافذة حذف الذاكرة (مُعدلة)
 // ===============================
-// فتح نافذة حذف الذاكرة
+// فتح نافذة حذف الذاكرة (معدل)
 resetDataBtn.addEventListener("click", () => {
+    hideAllScreens();
     deleteMemoryScreen.style.display = "flex";
     paused = true;
     pauseBtn.textContent = "▶ استئناف";
@@ -1218,6 +1299,10 @@ confirmDeleteBtn.addEventListener("click", () => {
     }
 });
 
+// ===============================
+// 🔗 نظام ربط الاستعادة المبسط
+// ===============================
+
 // دالة إنشاء رابط الاستعادة
 function generateRestoreLink() {
     const gameData = {
@@ -1232,159 +1317,163 @@ function generateRestoreLink() {
         ownedBackgrounds: ownedBackgrounds,
         currentBackground: currentBackground,
         ownedGifts: ownedGifts,
-        backgroundVolumeLevel: backgroundVolumeLevel,
-        effectsVolumeLevel: effectsVolumeLevel,
-        shootVolumeLevel: shootVolumeLevel
+        bgVolume: backgroundVolumeLevel,
+        fxVolume: effectsVolumeLevel,
+        shVolume: shootVolumeLevel
     };
     
-    // تحويل البيانات إلى JSON ثم تشفيرها
-    const jsonData = JSON.stringify(gameData);
-    const encodedData = btoa(unescape(encodeURIComponent(jsonData)));
+    // تحويل → نص → تشفير
+    const json = JSON.stringify(gameData);
+    const encoded = btoa(unescape(encodeURIComponent(json)));
     
-    // إنشاء الرابط مع البيانات المشفرة
-    const baseUrl = window.location.href.split('?')[0]; // الحصول على الرابط الأساسي بدون معلمات
-    return `${baseUrl}?restore=${encodedData}`;
+    // إرجاع الرابط الكامل
+    return `${window.location.href.split('?')[0]}?restore=${encoded}`;
 }
-// دالة نسخ الرابط إلى الحافظة
-function copyToClipboard(text) {
-    const textArea = document.createElement("textarea");
-    textArea.value = text;
-    document.body.appendChild(textArea);
-    textArea.select();
-    document.execCommand("copy");
-    document.body.removeChild(textArea);
+
+// دالة نسخ النص
+async function copyText(text) {
+    try {
+        await navigator.clipboard.writeText(text);
+        return true;
+    } catch {
+        // طريقة بديلة
+        const el = document.createElement('textarea');
+        el.value = text;
+        document.body.appendChild(el);
+        el.select();
+        document.execCommand('copy');
+        document.body.removeChild(el);
+        return true;
+    }
 }
+
 // دالة استعادة البيانات من الرابط
 function restoreFromLink(link) {
     try {
-        // استخراج البيانات المشفرة من الرابط
         const url = new URL(link);
-        const encodedData = url.searchParams.get("restore");
+        const encoded = url.searchParams.get('restore');
+        if (!encoded) throw new Error('لا توجد بيانات');
         
-        if (!encodedData) {
-            throw new Error("الرابط لا يحتوي على بيانات صالحة للاستعادة");
-        }
+        // فك التشفير
+        const json = decodeURIComponent(escape(atob(encoded)));
+        const data = JSON.parse(json);
         
-        // فك تشفير البيانات
-        const jsonData = decodeURIComponent(escape(atob(encodedData)));
-        const gameData = JSON.parse(jsonData);
-        
-        // تطبيق البيانات المستعادة
-        coins = gameData.coins || coins;
-        ownedPlanes = gameData.ownedPlanes || ownedPlanes;
-        currentPlane = gameData.currentPlane || currentPlane;
-        currentBullet = gameData.currentBullet || currentBullet;
-        currentShootSpeed = gameData.currentShootSpeed || currentShootSpeed;
-        autoShootEnabled = gameData.autoShootEnabled !== undefined ? gameData.autoShootEnabled : autoShootEnabled;
-        verticalMovementEnabled = gameData.verticalMovementEnabled !== undefined ? gameData.verticalMovementEnabled : verticalMovementEnabled;
-        planeRotationEnabled = gameData.planeRotationEnabled !== undefined ? gameData.planeRotationEnabled : planeRotationEnabled;
-        ownedBackgrounds = gameData.ownedBackgrounds || ownedBackgrounds;
-        currentBackground = gameData.currentBackground || currentBackground;
-        ownedGifts = gameData.ownedGifts || ownedGifts;
-        backgroundVolumeLevel = gameData.backgroundVolumeLevel || backgroundVolumeLevel;
-        effectsVolumeLevel = gameData.effectsVolumeLevel || effectsVolumeLevel;
-        shootVolumeLevel = gameData.shootVolumeLevel || shootVolumeLevel;
+        // تطبيق البيانات
+        coins = data.coins ?? coins;
+        ownedPlanes = data.ownedPlanes ?? ownedPlanes;
+        currentPlane = data.currentPlane ?? currentPlane;
+        currentBullet = data.currentBullet ?? currentBullet;
+        currentShootSpeed = data.currentShootSpeed ?? currentShootSpeed;
+        autoShootEnabled = data.autoShootEnabled ?? autoShootEnabled;
+        verticalMovementEnabled = data.verticalMovementEnabled ?? verticalMovementEnabled;
+        planeRotationEnabled = data.planeRotationEnabled ?? planeRotationEnabled;
+        ownedBackgrounds = data.ownedBackgrounds ?? ownedBackgrounds;
+        currentBackground = data.currentBackground ?? currentBackground;
+        ownedGifts = data.ownedGifts ?? ownedGifts;
+        backgroundVolumeLevel = data.bgVolume ?? backgroundVolumeLevel;
+        effectsVolumeLevel = data.fxVolume ?? effectsVolumeLevel;
+        shootVolumeLevel = data.shVolume ?? shootVolumeLevel;
         
         // تحديث قائمة الهدايا المتاحة
-        availableGifts = [];
-        for (let giftType in ownedGifts) {
-            if (ownedGifts[giftType]) {
-                availableGifts.push(giftType);
-            }
-        }
+        availableGifts = Object.keys(ownedGifts).filter(g => ownedGifts[g]);
         
         // تحديث الواجهة
-        plane.src = "image/Airplane/" + currentPlane + ".png";
-        updateStoreDisplay();
-        updateBackgroundDisplay();
-        updateGiftsDisplay();
+        const planeData = planesData.find(p => p.plane === currentPlane);
+        plane.src = planeData?.image || `image/Airplane/${currentPlane}.png`;
+        
+        // تحديث العملات فقط - الأقسام سيتم تحميلها عند ظهورها
         updateCoinsDisplay();
+        applyBackground(currentBackground);
+        
+        // تحديث الإعدادات
         autoShootCheckbox.checked = autoShootEnabled;
         verticalMovementCheckbox.checked = verticalMovementEnabled;
         planeRotationCheckbox.checked = planeRotationEnabled;
-        applyBackground(currentBackground);
         
-        // تحديث عناصر التحكم في الصوت
         backgroundVolume.value = backgroundVolumeLevel;
-        backgroundVolumeValue.textContent = backgroundVolumeLevel + "%";
+        backgroundVolumeValue.textContent = backgroundVolumeLevel + '%';
         effectsVolume.value = effectsVolumeLevel;
-        effectsVolumeValue.textContent = effectsVolumeLevel + "%";
+        effectsVolumeValue.textContent = effectsVolumeLevel + '%';
         shootVolume.value = shootVolumeLevel;
-        shootVolumeValue.textContent = shootVolumeLevel + "%";
+        shootVolumeValue.textContent = shootVolumeLevel + '%';
         
-        // حفظ البيانات في التخزين المحلي
+        // حفظ في localStorage
         saveGameData();
         
         return true;
     } catch (error) {
-        console.error("خطأ في استعادة البيانات:", error);
+        console.error('خطأ في الاستعادة:', error);
         return false;
     }
 }
+
+// إظهار إشعار
+function showMessage(msg) {
+    notification.textContent = msg;
+    notification.style.display = 'block';
+    setTimeout(() => notification.style.display = 'none', 2000);
+}
+
+// ===============================
+// 🎯 أحداث الأزرار
+// ===============================
+
 // نسخ رابط الاستعادة
-copyRestoreLinkBtn.addEventListener("click", () => {
-    const restoreLink = generateRestoreLink();
-    copyToClipboard(restoreLink);
-    
-    // عرض إشعار النسخ
-    notification.style.display = "block";
-    setTimeout(() => {
-        notification.style.display = "none";
-    }, 2000);
+copyRestoreLinkBtn.addEventListener('click', async () => {
+    const link = generateRestoreLink();
+    const copied = await copyText(link);
+    showMessage(copied ? '✅ تم نسخ الرابط' : '❌ فشل النسخ');
 });
+
 // استعادة البيانات من الرابط
-restoreDataBtn.addEventListener("click", () => {
+restoreDataBtn.addEventListener('click', () => {
     const link = restoreLinkInput.value.trim();
-    if (!link) {
-        alert("يرجى لصق رابط الاستعادة أولاً");
-        return;
-    }
+    if (!link) return alert('📋 الصق الرابط أولاً');
     
-    const success = restoreFromLink(link);
-    if (success) {
-        alert("تم استعادة البيانات بنجاح!");
-        restoreLinkInput.value = ""; // مسح الحقل بعد الاستعادة
+    if (restoreFromLink(link)) {
+        alert('✅ تم استعادة البيانات بنجاح');
+        restoreLinkInput.value = '';
     } else {
-        alert("حدث خطأ أثناء استعادة البيانات. يرجى التأكد من صحة الرابط.");
+        alert('❌ رابط غير صالح');
     }
 });
 
-// ===============================
-// 🔹 زر المشاركة (جديد)
-// ===============================
+// زر المشاركة
 const sharingBtn = document.getElementById("sharing");
 if (sharingBtn) {
-    sharingBtn.addEventListener("click", async () => {
-        const restoreLink = generateRestoreLink();
+    sharingBtn.addEventListener('click', async () => {
+        const link = generateRestoreLink();
+        
         if (navigator.share) {
             try {
                 await navigator.share({
-                    title: 'رابط استعادة بيانات لعبة الطائرات',
-                    text: 'اضغط على الرابط لاستعادة بيانات لعبتك',
-                    url: restoreLink,
+                    title: 'لعبة الطائرات',
+                    text: 'رابط استعادة تقدمك في اللعبة',
+                    url: link
                 });
-                console.log('تمت المشاركة بنجاح');
-            } catch (error) {
-                console.log('خطأ في المشاركة:', error);
-                // إذا فشلت المشاركة، ننسخ الرابط كبديل
-                copyToClipboard(restoreLink);
-                notification.style.display = "block";
-                notification.textContent = "تم نسخ الرابط إلى الحافظة";
-                setTimeout(() => {
-                    notification.style.display = "none";
-                }, 2000);
+            } catch {
+                await copyText(link);
+                showMessage('📋 تم نسخ الرابط');
             }
         } else {
-            // إذا لم يدعم المتصفح Web Share، ننسخ الرابط
-            copyToClipboard(restoreLink);
-            notification.style.display = "block";
-            notification.textContent = "تم نسخ الرابط إلى الحافظة";
-            setTimeout(() => {
-                notification.style.display = "none";
-            }, 2000);
+            await copyText(link);
+            showMessage('📋 تم نسخ الرابط');
         }
     });
 }
+
+// استعادة تلقائية عند فتح الرابط
+window.addEventListener('load', () => {
+    const params = new URLSearchParams(location.search);
+    const restoreData = params.get('restore');
+    
+    if (restoreData) {
+        if (restoreFromLink(location.href)) {
+            history.replaceState({}, '', location.pathname);
+            setTimeout(() => alert('✅ تم استعادة بياناتك'), 500);
+        }
+    }
+});
 
 // التحكم في مستوى صوت الخلفية
 backgroundVolume.addEventListener("input", function() {
@@ -1404,27 +1493,7 @@ shootVolume.addEventListener("input", function() {
     shootVolumeValue.textContent = shootVolumeLevel + "%";
     saveGameData();
 });
-// التحقق من وجود رابط استعادة عند تحميل الصفحة
-window.addEventListener("load", function() {
-    const urlParams = new URLSearchParams(window.location.search);
-    const restoreData = urlParams.get("restore");
-    
-    if (restoreData) {
-        // إعادة بناء الرابط الكامل مع البيانات
-        const currentUrl = window.location.href;
-        const success = restoreFromLink(currentUrl);
-        
-        if (success) {
-            // إزالة معلمة الاستعادة من الرابط بعد الاستعادة
-            const newUrl = window.location.href.split('?')[0];
-            window.history.replaceState({}, document.title, newUrl);
-            
-            alert("تم استعادة بيانات اللعبة بنجاح!");
-        } else {
-            alert("حدث خطأ في استعادة البيانات. يرجى التأكد من صحة الرابط.");
-        }
-    }
-});
+
 // ===============================
 // 🔄 زر إعادة الدور
 // ===============================
@@ -1459,6 +1528,7 @@ refreshBtn.addEventListener("click", () => {
     // حفظ البيانات بعد إعادة الدور
     saveGameData();
 });
+
 // ===============================
 // 🔄 تعديل دالة gameLoop الرئيسية (مع إضافة تأثير المغناطيس)
 // ===============================
@@ -1652,6 +1722,7 @@ function gameLoop() {
     }
     requestAnimationFrame(gameLoop);
 }
+
 // العد التنازلي للوقت
 let timer = setInterval(() => {
     if (!paused) {
@@ -1663,7 +1734,9 @@ let timer = setInterval(() => {
         }
     }
 }, 1000);
+
 restartBtn.addEventListener("click", () => {
+    hideAllScreens(); // إخفاء جميع الشاشات عند إعادة التشغيل
     resetGame();
     clearInterval(timer);
     timeLeft = 150;
@@ -1678,8 +1751,10 @@ restartBtn.addEventListener("click", () => {
         }
     }, 1000);
 });
+
 // تحميل البيانات عند بدء اللعبة
 loadGameData();
+
 // بدء اللعبة
 setInterval(spawnEnemy, 1500);
 gameLoop();
