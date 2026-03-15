@@ -43,7 +43,8 @@ const planesData = [
         speed: 110,
         image: "image/Airplane/airplane6.png",
         bulletImage: "image/bullets5.png",
-        displayPrice: "4,750"
+        displayPrice: "4,750", 
+        bulletOffset: 38
     },
     {
         plane: "airplane7",
@@ -53,6 +54,16 @@ const planesData = [
         image: "image/Airplane/airplane7.png",
         bulletImage: "image/bullets6.png",
         displayPrice: "6,000"
+    },
+    {
+    plane: "airplane8",
+    bullet: "bullets7.png",
+    price: 7500,           
+    speed: 90,                     
+    image: "image/Airplane/airplane8.png",
+    bulletImage: "image/bullets7.png",
+    displayPrice: "7,500",          
+    bulletOffset: 38
     }
 ];
 
@@ -202,3 +213,59 @@ const giftsData = [
         displayPrice: "4000"
     }
 ];
+
+
+
+// ------------------------------
+window.addEventListener("load", () => {
+
+    const bar = document.getElementById("progress");
+    const percent = document.getElementById("percent");
+    const loader = document.getElementById("gameLoader");
+
+    if (!bar || !percent || !loader) return;
+
+    const images = [...document.images];
+    let loadedImages = 0;
+    let totalImages = images.length || 1;
+
+    function updateProgress() {
+
+        loadedImages++;
+
+        let progress = Math.floor((loadedImages / totalImages) * 100);
+
+        bar.style.width = progress + "%";
+        percent.textContent = progress + "%";
+
+        // عند اكتمال التحميل
+        if (progress >= 100) {
+
+            percent.textContent = "اكتمل التحميل";
+
+            setTimeout(() => {
+
+                loader.style.opacity = "0";
+                loader.style.transition = "opacity 0.6s";
+
+                setTimeout(() => {
+                    loader.remove();
+                }, 600);
+
+            }, 500);
+
+        }
+    }
+
+    images.forEach(img => {
+
+        if (img.complete) {
+            updateProgress();
+        } else {
+            img.addEventListener("load", updateProgress);
+            img.addEventListener("error", updateProgress);
+        }
+
+    });
+
+});
