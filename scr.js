@@ -37,7 +37,7 @@ function customAlert(message){
     btn.innerText = "موافق";
     btn.style.padding = "8px 18px";
     btn.style.border = "none";
-    btn.style.borderRadius = "6px";
+    btn.style.borderRadius = "25px";
     btn.style.cursor = "pointer";
     btn.style.background = "#3b82f6";
     btn.style.color = "#fff";
