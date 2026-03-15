@@ -1,5 +1,5 @@
 // ===============================
-// 🔄 نظام الهدايا الجديد
+// 🔄 نظام الهدايا الجديد (مُعدل)
 // ===============================
 // متغيرات جديدة لتتبع الهدايا المشتراة والجاهزة للتفعيل العشوائي
 let availableGifts = []; // الهدايا التي تم شراؤها وجاهزة للتفعيل العشوائي
@@ -100,7 +100,7 @@ function updateGiftsDisplay() {
     });
 }
 
-// دالة شراء/تفعيل الهدية في المتجر
+// دالة شراء/تفعيل الهدية في المتجر (مُعدلة)
 function addGiftEventListeners() {
     const giftItems = document.querySelectorAll("#giftsSection .Wave-cloud");
     giftItems.forEach((item, index) => {
@@ -109,44 +109,58 @@ function addGiftEventListeners() {
             const price = parseInt(item.getAttribute("data-price"));
             const giftType = giftData.id;
            
+            // إذا كانت اللعبة قيد التشغيل، نوقفها مؤقتاً
+            if (!paused) {
+                paused = true;
+                pauseBtn.textContent = "▶ استئناف";
+            }
+            
             // إذا كانت الهدية مملوكة بالفعل
             if (ownedGifts[giftType]) {
                 alert("هذه الهدية مملوكة بالفعل وستظهر عشوائياً أثناء اللعبة!");
             }
             // إذا كانت الهدية مجانية أو لديه عملات كافية
             else if (price === 0 || coins >= price) {
+
                 // إذا لم تكن مجانية، نخصم السعر
                 if (price > 0) {
                     coins -= price;
                     updateCoinsDisplay();
+                    saveGameData(); // ✅ حفظ العملات فوراً بعد الخصم
                 }
-               
+            
                 // إضافة الهدية إلى الهدايا المملوكة
                 ownedGifts[giftType] = true;
-                
-                // إضافة الهدية إلى قائمة الهدايا المتاحة للتفعيل العشوائي
+
+                // إضافة الهدية إلى قائمة الهدايا المتاحة للتفعيل العشوائي (إذا لم تكن موجودة)
                 if (!availableGifts.includes(giftType)) {
                     availableGifts.push(giftType);
                 }
-               
+            
                 // تحديث التحديد في المتجر
                 updateGiftsDisplay();
-               
+            
                 // حفظ البيانات
                 saveGameData();
-                
-                alert("تم شراء الهدية! ستظهر عشوائياً أثناء اللعبة.");
+
+                alert("✅ تم شراء الهدية! ستظهر عشوائياً أثناء اللعبة.");
+                console.log("الهدايا المتاحة الآن:", availableGifts); // للتأكد
             } else {
-                alert("لا تملك عملات كافية لشراء هذه الهدية!");
+                alert("❌ لا تملك عملات كافية لشراء هذه الهدية!");
             }
         });
     });
 }
 
-// دالة إنشاء الهدية في اللعبة
+// دالة إنشاء الهدية في اللعبة (مُعدلة)
 function spawnGift() {
-    if (paused || giftSpawned || giftActiveInGame || availableGifts.length === 0) return;
+    // التحقق من وجود هدايا متاحة واللعبة ليست متوقفة
+    if (paused || giftSpawned || giftActiveInGame || availableGifts.length === 0) {
+        console.log("لا يمكن ظهور الهدية:", {paused, giftSpawned, giftActiveInGame, availableGifts: availableGifts.length});
+        return;
+    }
     
+    console.log("✨ ظهور هدية جديدة!");
     gift = document.createElement("img");
     gift.src = "image/Gift2.png";
     gift.className = "gift";
@@ -157,22 +171,29 @@ function spawnGift() {
     giftActiveInGame = true;
 }
 
-// دالة تفعيل تأثير الهدية العشوائية
+// دالة تفعيل تأثير الهدية العشوائية (مُعدلة)
 function activateRandomGiftEffect() {
-    if (!giftActiveInGame || availableGifts.length === 0) return;
+    if (!giftActiveInGame || availableGifts.length === 0) {
+        console.log("لا يمكن تفعيل الهدية");
+        return;
+    }
     
     // إزالة الهدية
     if (gift) {
         gift.remove();
         gift = null;
     }
+    giftSpawned = false;
     giftActiveInGame = false;
     
     // اختيار هدية عشوائية من الهدايا المتاحة
-    const randomGiftType = availableGifts[Math.floor(Math.random() * availableGifts.length)];
+    const randomIndex = Math.floor(Math.random() * availableGifts.length);
+    const randomGiftType = availableGifts[randomIndex];
     const giftData = giftsData.find(gift => gift.id === randomGiftType);
     
     if (!giftData) return;
+    
+    console.log("🎁 تفعيل هدية:", giftData.name);
     
     // استخدام دالة التأثير
     activateGiftEffect(giftData);
@@ -211,64 +232,70 @@ function activateGiftEffect(giftData) {
 
 // دالة تجميد الأعداء
 function freezeEnemies(duration) {
-    // إضافة كلاس للتجميد لكل عدو
+    showNotification("❄️ تم تجميد الأعداء!");
     enemies.forEach(enemy => {
         enemy.classList.add('frozen');
     });
     
-    // إزالة التجميد بعد المدة
     setTimeout(() => {
         enemies.forEach(enemy => {
             enemy.classList.remove('frozen');
         });
+        showNotification("انتهى تأثير التجميد");
     }, duration * 1000);
 }
 
 // دالة تفعيل الدرع
 function activateShield(duration) {
+    showNotification("🛡️ تم تفعيل الدرع!");
     plane.classList.add('shielded');
     setTimeout(() => {
         plane.classList.remove('shielded');
+        showNotification("انتهى تأثير الدرع");
     }, duration * 1000);
 }
 
 // دالة مضاعفة النقاط
 let doublePointsActive = false;
 function activateDoublePoints(duration) {
+    showNotification("⭐ مضاعفة النقاط مفعلة!");
     doublePointsActive = true;
     setTimeout(() => {
         doublePointsActive = false;
+        showNotification("انتهى تأثير مضاعفة النقاط");
     }, duration * 1000);
 }
 
 // دالة تفعيل تتبع الأهداف
 function activateTargetTracking(duration) {
-    // تنفيذ تأثير تتبع الأهداف
-    showNotification("تم تفعيل تتبع الأهداف!");
-    // يمكن إضافة الكود الخاص بتتبع الأهداف هنا
+    showNotification("🎯 تم تفعيل تتبع الأهداف!");
 }
 
-// دالة تفعيل جذب الأهداف
+// دالة تفعيل جذب الأهداف (مُعدلة)
+let magnetActive = false;
 function activateMagnet(duration) {
-    // تنفيذ تأثير جذب الأهداف
-    showNotification("تم تفعيل جذب الأهداف!");
-    // يمكن إضافة الكود الخاص بجذب الأهداف هنا
+    showNotification("🧲 تم تفعيل جذب الأهداف!");
+    magnetActive = true;
+    setTimeout(() => {
+        magnetActive = false;
+        showNotification("انتهى تأثير جذب الأهداف");
+    }, duration * 1000);
 }
 
-// دالة لتدمير أهداف عشوائية
+// دالة لتدمير أهداف عشوائية (مُعدلة - تفجر أول 5 أهداف)
 function destroyRandomEnemies(count) {
+    showNotification(`💥 تفجير ${count} أهداف!`);
     let destroyed = 0;
     
-    // إنشاء نسخة من مصفوفة الأعداء التي لا تزال موجودة في DOM
-    const validEnemies = enemies.filter(enemy => 
-        enemy && enemy.parentNode && document.body.contains(enemy)
-    );
+    // إنشاء نسخة من مصفوفة الأعداء (أول 5 أهداف فقط)
+    const enemiesToDestroy = [];
+    for (let i = 0; i < Math.min(count, enemies.length); i++) {
+        if (enemies[i] && enemies[i].parentNode) {
+            enemiesToDestroy.push(enemies[i]);
+        }
+    }
     
-    while (destroyed < count && validEnemies.length > 0) {
-        const randomIndex = Math.floor(Math.random() * validEnemies.length);
-        const enemy = validEnemies[randomIndex];
-        
-        // التحقق مرة أخرى من وجود العنصر
+    enemiesToDestroy.forEach(enemy => {
         if (enemy && enemy.parentNode) {
             // تفجير الهدف
             const rect = enemy.getBoundingClientRect();
@@ -290,10 +317,9 @@ function destroyRandomEnemies(count) {
             
             destroyed++;
         }
-        
-        // إزالة الهدف من النسخة
-        validEnemies.splice(randomIndex, 1);
-    }
+    });
+    
+    showNotification(`تم تدمير ${destroyed} أهداف!`);
 }
 
 // دالة لعرض إشعار
@@ -304,12 +330,15 @@ function showNotification(message) {
     notification.style.top = "50%";
     notification.style.left = "50%";
     notification.style.transform = "translate(-50%, -50%)";
-    notification.style.background = "rgba(0, 0, 0, 0.7)";
-    notification.style.color = "white";
-    notification.style.padding = "10px 20px";
-    notification.style.borderRadius = "5px";
+    notification.style.background = "rgba(0, 0, 0, 0.8)";
+    notification.style.color = "#fff";
+    notification.style.padding = "15px 30px";
+    notification.style.borderRadius = "10px";
     notification.style.zIndex = "10000";
-    notification.style.fontSize = "18px";
+    notification.style.fontSize = "24px";
+    notification.style.fontWeight = "bold";
+    notification.style.border = "2px solid gold";
+    notification.style.boxShadow = "0 0 20px gold";
     game.appendChild(notification);
     
     setTimeout(() => {
@@ -325,6 +354,10 @@ document.addEventListener('DOMContentLoaded', function() {
     addPlaneEventListeners();
     addBackgroundEventListeners();
     addGiftEventListeners();
+    
+    // التأكد من أن اللعبة متوقفة في البداية
+    paused = true;
+    pauseBtn.textContent = "▶ استئناف";
 });
 
 const game = document.getElementById("game");
@@ -368,7 +401,7 @@ const giftsSection = document.getElementById("giftsSection");
 const pauseBtn = document.createElement("button");
 pauseBtn.id = "pauseBtn";
 pauseBtn.className = "pauseBtn";
-pauseBtn.textContent = "⏸ إيقاف";
+pauseBtn.textContent = "▶ استئناف"; // معدل: يبدأ متوقفاً
 document.getElementById("hud").appendChild(pauseBtn);
 
 // ✅ زر إعادة الدور
@@ -380,12 +413,12 @@ let hearts = 7;
 let score = 0;
 // عداد الأهداف التي ظهرت
 let spawnedCount = 0;
-// حالة اللعبة
-let paused = false;
+// حالة اللعبة (معدل: تبدأ متوقفة)
+let paused = true;
 // الوقت بالثواني
 let timeLeft = 150;
 // العملات
-let coins = 1000;
+let coins = 0;
 // الطائرة الحالية
 let currentPlane = "airplane1";
 let currentBullet = "bullets.png";
@@ -454,15 +487,18 @@ const selectAllCheckbox = document.getElementById("selectAllCheckbox");
 const deleteCoinsCheckbox = document.getElementById("deleteCoins");
 const deletePlanesCheckbox = document.getElementById("deletePlanes");
 const deleteBackgroundsCheckbox = document.getElementById("deleteBackgrounds");
-const deleteGiftsCheckbox = document.getElementById("deleteGifts"); // المتغير الجديد
+const deleteGiftsCheckbox = document.getElementById("deleteGifts");
 const confirmDeleteBtn = document.getElementById("confirmDeleteBtn");
 
-// تحميل البيانات المحفوظة
+// تحميل البيانات المحفوظة (مُعدل)
+// تحميل البيانات المحفوظة (معدل لدعم GIF)
 function loadGameData() {
     const savedData = localStorage.getItem('airplaneGameData');
     if (savedData) {
         const data = JSON.parse(savedData);
-        coins = data.coins || coins;
+        if (data.coins !== undefined) {
+            coins = data.coins;
+        }
         ownedPlanes = data.ownedPlanes || ownedPlanes;
         currentPlane = data.currentPlane || currentPlane;
         currentBullet = data.currentBullet || currentBullet;
@@ -476,16 +512,33 @@ function loadGameData() {
         backgroundVolumeLevel = data.backgroundVolumeLevel || backgroundVolumeLevel;
         effectsVolumeLevel = data.effectsVolumeLevel || effectsVolumeLevel;
         shootVolumeLevel = data.shootVolumeLevel || shootVolumeLevel;
-       
-        // تحديث الطائرة الحالية
-        plane.src = "image/Airplane/" + currentPlane + ".png";
-       
+        
+        // البحث عن بيانات الطائرة الحالية
+        const currentPlaneData = planesData.find(p => p.plane === currentPlane);
+        
+        // تحديث الطائرة الحالية مع دعم GIF
+        if (currentPlaneData && currentPlaneData.image.endsWith('.gif')) {
+            plane.src = currentPlaneData.image;
+        } else {
+            plane.src = "image/Airplane/" + currentPlane + ".png";
+        }
+        
+        // تحديث قائمة الهدايا المتاحة بناءً على الهدايا المملوكة
+        availableGifts = [];
+        for (let giftType in ownedGifts) {
+            if (ownedGifts[giftType]) {
+                availableGifts.push(giftType);
+            }
+        }
+        
+        console.log("الهدايا المتاحة بعد التحميل:", availableGifts);
+        
         // تحديث المتجر
         updateStoreDisplay();
         updateBackgroundDisplay();
         updateGiftsDisplay();
         updateCoinsDisplay();
-       
+        
         // تحديث الإعدادات
         autoShootCheckbox.checked = autoShootEnabled;
         verticalMovementCheckbox.checked = verticalMovementEnabled;
@@ -501,13 +554,10 @@ function loadGameData() {
         
         // تطبيق الخلفية الحالية
         applyBackground(currentBackground);
-        
-        // تحديث قائمة الهدايا المتاحة بناءً على الهدايا المملوكة
-        availableGifts = Object.keys(ownedGifts).filter(type => ownedGifts[type]);
     }
 }
 
-// حفظ البيانات
+// حفظ البيانات (مُعدل)
 function saveGameData() {
     const gameData = {
         coins: coins,
@@ -579,20 +629,31 @@ function autoShoot() {
 }
 function shoot() {
     const rect = plane.getBoundingClientRect();
+    
+    // البحث عن بيانات الطائرة الحالية
+    const currentPlaneData = planesData.find(p => p.plane === currentPlane);
+    
+    // تحديد offset الرصاصة (الارتفاع من الأسفل)
+    // إذا كانت الطائرة تحتوي على خاصية bulletOffset نستخدمها، وإلا نستخدم القيمة الافتراضية 70
+    const bulletBottomOffset = currentPlaneData && currentPlaneData.bulletOffset ? currentPlaneData.bulletOffset : 70;
+    
     const leftBullet = document.createElement("img");
     leftBullet.src = "image/" + currentBullet;
     leftBullet.className = "bullet";
     leftBullet.style.left = (rect.left + 10) + "px";
-    leftBullet.style.bottom = (planeY + 70) + "px";
+    leftBullet.style.bottom = (planeY + bulletBottomOffset) + "px"; // استخدام offset مخصص
+    
     const rightBullet = document.createElement("img");
     rightBullet.src = "image/" + currentBullet;
     rightBullet.className = "bullet";
     rightBullet.style.left = (rect.right - 24) + "px";
-    rightBullet.style.bottom = (planeY + 70) + "px";
+    rightBullet.style.bottom = (planeY + bulletBottomOffset) + "px"; // استخدام offset مخصص
+    
     game.appendChild(leftBullet);
     game.appendChild(rightBullet);
     bullets.push(leftBullet, rightBullet);
 }
+
 function spawnEnemy() {
     if (paused) return;
     const enemy = document.createElement("img");
@@ -872,6 +933,7 @@ function updateCoinsDisplay() {
     coinsDisplay.textContent = coins;
 }
 // شراء طائرة جديدة
+// شراء طائرة جديدة (معدلة لدعم GIF)
 function addPlaneEventListeners() {
     const planeItems = document.querySelectorAll("#planesSection .Wave-cloud");
     planeItems.forEach(item => {
@@ -880,18 +942,27 @@ function addPlaneEventListeners() {
             const planeType = item.getAttribute("data-plane");
             const bulletType = item.getAttribute("data-bullet");
             const shootSpeed = parseInt(item.getAttribute("data-speed"));
-           
+            
+            // البحث عن بيانات الطائرة في المصفوفة للحصول على مسار الصورة الصحيح
+            const planeData = planesData.find(p => p.plane === planeType);
+            
             // إذا كانت الطائرة مملوكة بالفعل
             if (ownedPlanes[planeType]) {
                 // تحديث الطائرة الحالية
                 currentPlane = planeType;
                 currentBullet = bulletType;
                 currentShootSpeed = shootSpeed;
-                plane.src = "image/Airplane/" + planeType + ".png";
-               
+                
+                // تحديد ما إذا كانت الصورة GIF أو PNG
+                if (planeData && planeData.image.endsWith('.gif')) {
+                    plane.src = planeData.image;
+                } else {
+                    plane.src = "image/Airplane/" + planeType + ".png";
+                }
+                
                 // تحديث التحديد في المتجر
                 updateStoreDisplay();
-               
+                
                 // حفظ البيانات
                 saveGameData();
             }
@@ -902,19 +973,25 @@ function addPlaneEventListeners() {
                     coins -= price;
                     updateCoinsDisplay();
                 }
-               
+                
                 // إضافة الطائرة إلى الطائرات المملوكة
                 ownedPlanes[planeType] = true;
-               
+                
                 // تحديث الطائرة الحالية
                 currentPlane = planeType;
                 currentBullet = bulletType;
                 currentShootSpeed = shootSpeed;
-                plane.src = "image/Airplane/" + planeType + ".png";
-               
+                
+                // تحديد ما إذا كانت الصورة GIF أو PNG
+                if (planeData && planeData.image.endsWith('.gif')) {
+                    plane.src = planeData.image;
+                } else {
+                    plane.src = "image/Airplane/" + planeType + ".png";
+                }
+                
                 // تحديث التحديد في المتجر
                 updateStoreDisplay();
-               
+                
                 // حفظ البيانات
                 saveGameData();
             } else {
@@ -923,6 +1000,7 @@ function addPlaneEventListeners() {
         });
     });
 }
+
 // شراء خلفية جديدة
 function addBackgroundEventListeners() {
     const bgItems = document.querySelectorAll("#backgroundsSection .Wave-cloud");
@@ -969,15 +1047,6 @@ function addBackgroundEventListeners() {
         });
     });
 }
-// إضافة مستمعي الأحداث بعد إنشاء الأقسام
-document.addEventListener('DOMContentLoaded', function() {
-    createPlanesSection();
-    createBackgroundsSection();
-    createGiftsSection();
-    addPlaneEventListeners();
-    addBackgroundEventListeners();
-    addGiftEventListeners();
-});
 // التبديل بين قسم الطائرات والخلفيات والهدايا
 planesTab.addEventListener("click", () => {
     planesSection.style.display = "flex";
@@ -1049,7 +1118,7 @@ planeRotationCheckbox.addEventListener("change", function() {
     }
 });
 // ===============================
-// 🗑️ وظائف نافذة حذف الذاكرة
+// 🗑️ وظائف نافذة حذف الذاكرة (مُعدلة)
 // ===============================
 // فتح نافذة حذف الذاكرة
 resetDataBtn.addEventListener("click", () => {
@@ -1057,12 +1126,12 @@ resetDataBtn.addEventListener("click", () => {
     paused = true;
     pauseBtn.textContent = "▶ استئناف";
     
-    // إعادة تعيين خيارات الحذف إلى الوضع الافتراضي
-    selectAllCheckbox.checked = true;
-    deleteCoinsCheckbox.checked = true;
-    deletePlanesCheckbox.checked = true;
-    deleteBackgroundsCheckbox.checked = true;
-    deleteGiftsCheckbox.checked = true; // إضافة الخانة الجديدة
+    // إعادة تعيين خيارات الحذف إلى الوضع الافتراضي (غير محددة)
+    selectAllCheckbox.checked = false;
+    deleteCoinsCheckbox.checked = false;
+    deletePlanesCheckbox.checked = false;
+    deleteBackgroundsCheckbox.checked = false;
+    deleteGiftsCheckbox.checked = false;
 });
 
 // إغلاق نافذة حذف الذاكرة
@@ -1070,16 +1139,16 @@ closeDeleteMemoryBtn.addEventListener("click", () => {
     deleteMemoryScreen.style.display = "none";
 });
 
-// وظيفة تحديد/إلغاء تحديد الكل (محدثة)
+// وظيفة تحديد/إلغاء تحديد الكل
 selectAllCheckbox.addEventListener("change", function() {
     const isChecked = this.checked;
     deleteCoinsCheckbox.checked = isChecked;
     deletePlanesCheckbox.checked = isChecked;
     deleteBackgroundsCheckbox.checked = isChecked;
-    deleteGiftsCheckbox.checked = isChecked; // إضافة الخانة الجديدة
+    deleteGiftsCheckbox.checked = isChecked;
 });
 
-// وظيفة التحقق من تحديد الخيارات الفردية (محدثة)
+// وظيفة التحقق من تحديد الخيارات الفردية
 const deleteOptions = document.querySelectorAll(".deleteOption");
 deleteOptions.forEach(option => {
     option.addEventListener("change", function() {
@@ -1094,13 +1163,13 @@ deleteOptions.forEach(option => {
     });
 });
 
-// تأكيد حذف الذاكرة (محدثة)
+// تأكيد حذف الذاكرة
 confirmDeleteBtn.addEventListener("click", () => {
     // التحقق مما إذا تم تحديد أي خيار
     const deleteCoins = deleteCoinsCheckbox.checked;
     const deletePlanes = deletePlanesCheckbox.checked;
     const deleteBackgrounds = deleteBackgroundsCheckbox.checked;
-    const deleteGifts = deleteGiftsCheckbox.checked; // الخيار الجديد
+    const deleteGifts = deleteGiftsCheckbox.checked;
     
     if (!deleteCoins && !deletePlanes && !deleteBackgrounds && !deleteGifts) {
         alert("يرجى تحديد ما تريد حذفه على الأقل!");
@@ -1114,7 +1183,7 @@ confirmDeleteBtn.addEventListener("click", () => {
         
         // حذف البيانات المحددة
         if (deleteCoins) {
-            gameData.coins = 1000; // إعادة تعيين العملات إلى القيمة الافتراضية
+            gameData.coins = 10000; // إعادة تعيين العملات إلى القيمة الافتراضية
         }
         
         if (deletePlanes) {
@@ -1129,7 +1198,6 @@ confirmDeleteBtn.addEventListener("click", () => {
             gameData.currentBackground = "default"; // إعادة تعيين الخلفية الحالية
         }
         
-        // إضافة الحذف الجديد للهدايا
         if (deleteGifts) {
             gameData.ownedGifts = {
                 "clock": true,
@@ -1140,9 +1208,6 @@ confirmDeleteBtn.addEventListener("click", () => {
                 "magnet": false,
                 "freeze": false
             }; // إعادة تعيين الهدايا المملوكة
-            
-            // تحديث قائمة الهدايا المتاحة
-            availableGifts = ["clock", "bomb"];
         }
         
         // حفظ البيانات المحدثة
@@ -1220,6 +1285,14 @@ function restoreFromLink(link) {
         effectsVolumeLevel = gameData.effectsVolumeLevel || effectsVolumeLevel;
         shootVolumeLevel = gameData.shootVolumeLevel || shootVolumeLevel;
         
+        // تحديث قائمة الهدايا المتاحة
+        availableGifts = [];
+        for (let giftType in ownedGifts) {
+            if (ownedGifts[giftType]) {
+                availableGifts.push(giftType);
+            }
+        }
+        
         // تحديث الواجهة
         plane.src = "image/Airplane/" + currentPlane + ".png";
         updateStoreDisplay();
@@ -1238,9 +1311,6 @@ function restoreFromLink(link) {
         effectsVolumeValue.textContent = effectsVolumeLevel + "%";
         shootVolume.value = shootVolumeLevel;
         shootVolumeValue.textContent = shootVolumeLevel + "%";
-        
-        // تحديث قائمة الهدايا المتاحة بناءً على الهدايا المملوكة
-        availableGifts = Object.keys(ownedGifts).filter(type => ownedGifts[type]);
         
         // حفظ البيانات في التخزين المحلي
         saveGameData();
@@ -1278,6 +1348,44 @@ restoreDataBtn.addEventListener("click", () => {
         alert("حدث خطأ أثناء استعادة البيانات. يرجى التأكد من صحة الرابط.");
     }
 });
+
+// ===============================
+// 🔹 زر المشاركة (جديد)
+// ===============================
+const sharingBtn = document.getElementById("sharing");
+if (sharingBtn) {
+    sharingBtn.addEventListener("click", async () => {
+        const restoreLink = generateRestoreLink();
+        if (navigator.share) {
+            try {
+                await navigator.share({
+                    title: 'رابط استعادة بيانات لعبة الطائرات',
+                    text: 'اضغط على الرابط لاستعادة بيانات لعبتك',
+                    url: restoreLink,
+                });
+                console.log('تمت المشاركة بنجاح');
+            } catch (error) {
+                console.log('خطأ في المشاركة:', error);
+                // إذا فشلت المشاركة، ننسخ الرابط كبديل
+                copyToClipboard(restoreLink);
+                notification.style.display = "block";
+                notification.textContent = "تم نسخ الرابط إلى الحافظة";
+                setTimeout(() => {
+                    notification.style.display = "none";
+                }, 2000);
+            }
+        } else {
+            // إذا لم يدعم المتصفح Web Share، ننسخ الرابط
+            copyToClipboard(restoreLink);
+            notification.style.display = "block";
+            notification.textContent = "تم نسخ الرابط إلى الحافظة";
+            setTimeout(() => {
+                notification.style.display = "none";
+            }, 2000);
+        }
+    });
+}
+
 // التحكم في مستوى صوت الخلفية
 backgroundVolume.addEventListener("input", function() {
     backgroundVolumeLevel = this.value;
@@ -1352,7 +1460,7 @@ refreshBtn.addEventListener("click", () => {
     saveGameData();
 });
 // ===============================
-// 🔄 تعديل دالة gameLoop الرئيسية
+// 🔄 تعديل دالة gameLoop الرئيسية (مع إضافة تأثير المغناطيس)
 // ===============================
 function gameLoop() {
     if (!paused) {
@@ -1443,9 +1551,24 @@ function gameLoop() {
             }
         });
         
-        // تحريك الأعداء والتحقق من الاصطدام
+        // تحريك الأعداء والتحقق من الاصطدام (مع تأثير المغناطيس)
         enemies.forEach((e, i) => {
-            e.style.top = parseInt(e.style.top) + 3 + "px";
+            // الحركة الأساسية
+            let step = magnetActive ? 5 : 3; // زيادة السرعة عند تفعيل المغناطيس
+            e.style.top = parseInt(e.style.top) + step + "px";
+            
+            // إذا كان المغناطيس نشطاً، اسحب الهدف أفقياً نحو الطائرة
+            if (magnetActive && !e.classList.contains('frozen')) {
+                let enemyLeft = parseFloat(e.style.left);
+                let dx = planeX - enemyLeft;
+                // حركة أفقية بنسبة 5% من المسافة (تجنب الخروج السريع)
+                e.style.left = enemyLeft + dx * 0.05 + "px";
+                
+                // منع الخروج الجانبي
+                if (parseFloat(e.style.left) < 0) e.style.left = "0px";
+                if (parseFloat(e.style.left) > window.innerWidth - 60) e.style.left = (window.innerWidth - 60) + "px";
+            }
+            
             if (parseInt(e.style.top) > window.innerHeight) {
                 e.remove();
                 enemies.splice(i, 1);
@@ -1560,3 +1683,10 @@ loadGameData();
 // بدء اللعبة
 setInterval(spawnEnemy, 1500);
 gameLoop();
+
+// التأكيد على أن اللعبة متوقفة في البداية
+setTimeout(() => {
+    paused = true;
+    pauseBtn.textContent = "▶ استئناف";
+    console.log("اللعبة متوقفة في البداية");
+}, 100);
