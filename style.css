@@ -568,6 +568,12 @@ xxd label {
     }
 }
 
+@media (max-width: 800px) {
+    #hud {
+        margin: 10px;
+    }
+}
+
 @media (max-width: 500px) {
     .resultScfr-sho2 div {
         width: 27.5%;
