@@ -196,6 +196,14 @@
           document.documentElement.style.zoom = "100%";
       
         })();
+
+        document.addEventListener("contextmenu", function(e) {
+
+            if (e.target.tagName === "IMG" || e.target.tagName === "A") {
+                e.preventDefault();
+            }
+        
+        });
     </script>
 
     <script src="script dtat.js"></script>
