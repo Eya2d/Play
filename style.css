@@ -1,3 +1,9 @@
+html,body{
+touch-action: manipulation;
+overscroll-behavior: none;
+overflow: hidden;
+}
+
 body {
     margin: 0;
     overflow: hidden;
@@ -23,6 +29,8 @@ button {
     transition: ease 0.1s;
     direction: ltr !important;
     outline-color: white;
+    display: flex;
+    align-items: center;
 }
 div {
     transition: ease 0.1s;
@@ -97,6 +105,11 @@ body #hearts {
     opacity: 0;
     transition: opacity 2s ease-in-out;
 }
+#pauseBtn {
+    height: 35px;
+    padding: 0 14px;
+}
+
 .pauseBtn {
     direction: ltr;
     display: flex;
@@ -253,6 +266,7 @@ body #hearts {
     width: 61px;
     border-radius: 25px;
     background: #0000;
+    justify-content: center;
 }
 .xxrw button:hover {
     background-color: #ffffff47;
@@ -291,6 +305,10 @@ body .sho3 img {
 }
 .store-div-001 img {
     height: 30px;
+}
+.store-div-001 button {
+    height: 42px;
+    padding: 0 14px;
 }
 body .owned {
     position: absolute;
