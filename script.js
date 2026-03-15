@@ -1183,7 +1183,7 @@ confirmDeleteBtn.addEventListener("click", () => {
         
         // حذف البيانات المحددة
         if (deleteCoins) {
-            gameData.coins = 10000; // إعادة تعيين العملات إلى القيمة الافتراضية
+            gameData.coins = 1700; // إعادة تعيين العملات إلى القيمة الافتراضية
         }
         
         if (deletePlanes) {
