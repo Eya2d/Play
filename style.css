@@ -1,7 +1,11 @@
 html,body{
-touch-action: manipulation;
-overscroll-behavior: none;
-overflow: hidden;
+/* touch-action: manipulation;
+overscroll-behavior: none; */
+/* overflow: hidden; */
+}
+
+div {
+    touch-action: pan-y !important;
 }
 
 body {
@@ -194,6 +198,7 @@ body #hearts {
     overflow: auto;
     position: relative;
     scrollbar-width: none;
+    margin: 10px 12px;
     width: 610px;
     height: 560px;
     background: #114681;
