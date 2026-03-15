@@ -1,6 +1,7 @@
 body {
     margin: 0;
     overflow: hidden;
+    color: white;
     background: #122759;
     box-shadow: 0px 16px 33px #1f469f inset;
     font-family: sans-serif;
@@ -19,7 +20,12 @@ img {
     display: inline-block;
 }
 button {
+    transition: ease 0.1s;
+    direction: ltr !important;
     outline-color: white;
+}
+div {
+    transition: ease 0.1s;
 }
 body #game {
     width: 100%;
@@ -51,6 +57,7 @@ body #hearts {
     flex-wrap: wrap;
 }
 #hearts img {
+    transition: ease 0.3s;
     width: 35px;
     margin-left: 10px;
 }
@@ -74,6 +81,10 @@ body #hearts {
 .enemy, .heart, .gift {
     position: absolute;
     width: 60px;
+}
+.enemy {
+    /* transform: rotate(133deg); */
+    width: 65px;
 }
 .explosion {
     position: absolute;
@@ -107,6 +118,7 @@ body #hearts {
 }
 .Close-div {
     position: absolute !important;
+    z-index: 30;
     top: 0;
     right: 0;
     margin: 20px;
@@ -172,6 +184,7 @@ body #hearts {
     height: 560px;
     background: #114681;
     box-shadow: 0px 4px 10px #002451b0;
+    border-radius: 10px;
 }
 .resultScfr-div::after {
     position: absolute;
@@ -203,6 +216,7 @@ body #hearts {
 .resultScfr-sho2 {
     display: flex;
     flex-wrap: wrap;
+    padding-bottom: 40px;
 }
 .resultScfr-sho2 div {
     position: relative;
@@ -210,7 +224,7 @@ body #hearts {
     padding: 10px;
     width: 132.5px;
     height: 132px;
-    border-radius: 14px;
+    /* border-radius: 14px; */
 }
 .resultScfr-sho2 div:hover {
     background-color: #ffffff47;
@@ -286,7 +300,7 @@ body .owned {
     padding: 2px 6px;
     border-radius: 10px;
     font-size: 12px;
-    display: none;
+    display: none !important;
 }
 .setin {
     display: block;
@@ -354,6 +368,7 @@ body .setin label button, body .setin div button {
     bottom: 0;
     position: sticky;
     background: #376299;
+    margin-top: 40px;
 }
 
 /* تأثيرات الهدايا */
@@ -399,4 +414,145 @@ body .setin label button, body .setin div button {
     #hearts img {
         width: 25px;
     }
+}
+
+#custom-tooltip {
+    background-color: rgba(255, 255, 255, 0.719) !important;
+    color: #3c3e42 !important;
+    border-color: #0000 !important;
+}
+#custom-tooltip div {
+    border-color: rgba(255, 255, 255, 0) !important;
+}
+
+.sharing {
+    font-size: 20px;
+}
+
+
+
+
+
+
+/* شاشة التحميل */
+#gameLoader{
+position:fixed;
+inset:0;
+/* background:radial-gradient(circle,#1e293b,#020617); */
+display:flex;
+justify-content:center;
+align-items:center;
+z-index:9999;
+backdrop-filter: blur(39px);
+}
+
+/* صندوق التحميل */
+.start-screen{
+text-align:center;
+}
+
+.game-title{
+font-size:42px;
+letter-spacing:4px;
+margin-bottom:40px;
+text-shadow:0 0 10px #2260a84b;
+}
+
+.loading-progress{
+overflow: hidden;
+    width: 0%;
+    border-radius: 8px;
+    position: relative;
+    background: linear-gradient(90deg, #259dc4, #4aa3de, #ce5efe);
+    transition: width .2s;
+}
+
+/* اطار شريط التحميل */
+.loading-bar{
+    direction: ltr;
+    width: 420px;
+    height: 24px;
+    border-radius: 12px;
+    padding: 3px;
+    border: 2px solid #006dff96;
+    overflow: hidden;
+    margin: auto;
+}
+
+/* الجزء المتحرك */
+.loading-progress{
+    height: 100%;
+    width: 0%;
+    border-radius: 8px;
+    position: relative;
+    background: linear-gradient(90deg, #259dc4, #4aa3de, #ce5efe);
+    transition: width .2s;
+}
+
+/* خطوط متحركة مثل الألعاب */
+.loading-progress::after{
+    content:"";
+    position:absolute;
+    width: 426px;
+    inset:0;
+    background:
+repeating-linear-gradient(
+        -127deg,
+        rgba(255,255,255,.25) 0px,
+        rgba(255,255,255,.25) 10px,
+        transparent 10px,
+        transparent 20px
+    );
+    animation:move 1s linear infinite;
+}
+
+@keyframes move{
+    from{background-position:0 0;
+
+    }
+    to{    background-position: 40px 0;
+    margin-left: auto;
+    margin-right: -8px;}
+}
+
+/* النسبة */
+.percent{
+    margin-top:14px;
+    font-size:18px;
+    color: #ffffff;
+    text-shadow: 0 0 8px #228fc5;
+}
+
+/* زر البداية */
+.start-btn{
+margin-top: 30px;
+    padding: 13px 40px;
+    font-size: 18px;
+    border: none;
+    font-family: system-ui;
+    border-radius: 10px;
+    background: linear-gradient(180deg, #22a7c5, #2a8cc2);
+    color: white;
+    cursor: pointer;
+    box-shadow: 0 0 10px #22abc5;
+}
+
+.start-btn:hover{
+    transform:scale(1.05);
+}
+.start-btn .ripple {
+    background-color: #3ca7e05b !important;
+}
+
+#refreshBtn img {
+    transition: ease 0.2s;
+}
+#refreshBtn:hover img {
+    transform: rotate(16deg);
+}
+#Setting img {
+    transition: ease 0.2s;
+}
+#Setting:hover img {
+    transform: rotate(23deg);
 }
