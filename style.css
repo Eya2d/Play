@@ -44,6 +44,7 @@ body #game {
     left: 10px;
     right: 10px;
     display: flex;
+    flex-wrap: wrap;
     z-index: 999;
     margin: 20px;
 }
@@ -555,4 +556,56 @@ margin-top: 30px;
 }
 #Setting:hover img {
     transform: rotate(23deg);
+}
+
+xxd label {
+    cursor: pointer;
+}
+
+@media (hover: none) and (pointer: coarse) {
+    button,div,a,span {
+        -webkit-tap-highlight-color: transparent;
+    }
+}
+
+@media (max-width: 500px) {
+    .resultScfr-sho2 div {
+        width: 27.5%;
+        height: max-content;
+    }
+    .resultScfr-sho2 div img {
+        height: 72px;
+    }
+    .resultScfr-div {
+        margin: 0 12px;
+        max-width: -webkit-fill-available;
+    }
+}
+
+@media (max-width: 380px) {
+    .resultScfr-sho2 div {
+        width: 27.5%;
+        height: max-content;
+    }
+    .resultScfr-sho2 div img {
+        height: 72px;
+    }
+    .resultScfr-div {
+        margin: 10px 12px;
+        max-width: -webkit-fill-available;
+    }
+}
+
+@media (max-width: 360px) {
+    .resultScfr-div {
+        margin: 0 12px;
+        max-width: -webkit-fill-available;
+    }
+    .resultScfr-sho2 div {
+        width: 92px;
+        height: max-content;
+    }
+    .resultScfr-sho2 div img {
+        height: 72px;
+    }
 }
