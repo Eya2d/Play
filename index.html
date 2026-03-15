@@ -2,7 +2,6 @@
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>لعبة الطائرة</title>
     <link rel="icon" href="image/logo.png">
     <link rel="stylesheet" href="style.css">
@@ -156,53 +155,47 @@
 
 
     <script>
-        /* منع الزوم بعجلة الماوس */
-        window.addEventListener("wheel", function(e){
-            if(e.ctrlKey){
+        (function () {
+
+          /* منع الزوم بالكيبورد */
+          document.addEventListener('keydown', function (e) {
+            if (e.ctrlKey || e.metaKey) {
+              const key = e.key.toLowerCase();
+              if (key === '+' || key === '-' || key === '=' || key === '0') {
                 e.preventDefault();
+              }
             }
-        },{ passive:false });
-        
-        
-        /* منع الزوم من الكيبورد */
-        window.addEventListener("keydown", function(e){
-        
-            if(
-                (e.ctrlKey && (e.key === '+' || e.key === '-' || e.key === '=')) ||
-                (e.ctrlKey && e.key === '0')
-            ){
-                e.preventDefault();
+          });
+      
+          /* منع Ctrl + عجلة الماوس */
+          document.addEventListener('wheel', function (e) {
+            if (e.ctrlKey || e.metaKey) {
+              e.preventDefault();
             }
-        
-        });
-        
-        
-        /* منع الزوم باللمس (Pinch Zoom) */
-        document.addEventListener('touchmove', function(e) {
-            if (e.scale !== 1) {
-                e.preventDefault();
-            }
-        }, { passive: false });
-        
-        
-        /* منع الزوم بتعدد اللمسات */
-        document.addEventListener('touchstart', function(e) {
+          }, { passive: false });
+      
+          /* منع الزوم باللمس (Pinch) */
+          document.addEventListener('touchstart', function (e) {
             if (e.touches.length > 1) {
-                e.preventDefault();
+              e.preventDefault();
             }
-        }, { passive: false });
-        
-        
-        /* منع القائمة اليمنى */
-        document.addEventListener("contextmenu", function(e){
-            e.preventDefault();
-        });
-        
-        
-        /* منع السحب */
-        document.addEventListener("dragstart", function(e){
-            e.preventDefault();
-        });
+          }, { passive: false });
+      
+          /* منع Double Tap */
+          let lastTouch = 0;
+          document.addEventListener('touchend', function (e) {
+            const now = Date.now();
+            if (now - lastTouch < 300) {
+              e.preventDefault();
+            }
+            lastTouch = now;
+          }, false);
+      
+          /* إجبار الزوم = 100% */
+          document.body.style.zoom = "100%";
+          document.documentElement.style.zoom = "100%";
+      
+        })();
     </script>
 
     <script src="script dtat.js"></script>
