@@ -6,7 +6,7 @@
     <link rel="icon" href="image/logo.png">
     <link rel="stylesheet" href="style.css">
     <script type="module" src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.esm.js"></script>
-    <script src="https://cdn.jsdelivr.net/gh/Eya2d/Wave-cloud/wave-cloud.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/IconCanyon/Icon-canyon@main/Wave-cloud-3.0.0.js"></script> 
     <script src="https://cdn.jsdelivr.net/gh/IconCanyon/Icon-canyon@main/Title-Style-1.0.0.js"></script>
 
 </head>
@@ -42,7 +42,7 @@
             <div class="resultScfr-1203">
                 <div class="flex">
                     <button class="pauseBtn Wave-cloud" id="copyRestoreLinkBtn" style="margin-right: 10px;">نسخ رابط الإستعادة</button> <!-- زر نسخ شفرة قوية مكونة من ارقام واحرف يتم حفظ جميع تقدم المستخدم بها من اشياء اشتراها امواله -->
-                    <button class="pauseBtn Wave-cloud" title="شارك مع من تحب"><ion-icon name="share-social-outline"></ion-icon></button>
+                    <button class="pauseBtn sharing Wave-cloud" id="sharing" title="شارك مع من تحب"><ion-icon name="arrow-undo-outline"></ion-icon></button>
                 </div>
                 
                 <xxd>الإعدادات</xxd>
@@ -115,19 +115,39 @@
         <div class="Close-div Wave-center" id="closeDeleteMemoryBtn"><ion-icon name="close-outline"></ion-icon></div>
         <div class="resultScfr-div" style="box-shadow: none;">
             <div class="resultScfr-1203">
-                <div class="flex"><input type="checkbox" id="selectAllCheckbox" checked></div> <!-- تحديد الكل -->
+                <div class="flex"><input type="checkbox" id="selectAllCheckbox"></div> <!-- تحديد الكل -->
                 <xxd>الإعدادات > <span style="opacity: .7;">حذف الذاكرة</span></xxd>
             </div>
             <div class="setin Wave-all">
-                <label> حذف المال <input type="checkbox" id="deleteCoins" class="deleteOption" checked></label>
-                <label> حذف مشترياتي في قسم الطائرات <input type="checkbox" id="deletePlanes" class="deleteOption" checked></label>
-                <label> حذف مشترياتي في قسم الخلفيات <input type="checkbox" id="deleteBackgrounds" class="deleteOption" checked></label>
+                <label> حذف المال <input type="checkbox" id="deleteCoins" class="deleteOption"></label>
+                <label> حذف مشترياتي في قسم الطائرات <input type="checkbox" id="deletePlanes" class="deleteOption"></label>
+                <label> حذف مشترياتي في قسم الخلفيات <input type="checkbox" id="deleteBackgrounds" class="deleteOption"></label>
                 <!-- إضافة الخانة الجديدة -->
-                <label> حذف مشترياتي في قسم الهدايا <input type="checkbox" id="deleteGifts" class="deleteOption" checked></label>
+                <label> حذف مشترياتي في قسم الهدايا <input type="checkbox" id="deleteGifts" class="deleteOption"></label>
                 <div><button class="pauseBtn" id="confirmDeleteBtn">حذف الذاكرة</button></div>
             </div>
         </div>
     </div>
+
+
+    <!-- شاشة التحميل -->
+    <div id="gameLoader">
+
+    <div class="start-screen">
+
+    <div class="game-title">MY GAME</div>
+
+    <div class="loading-bar">
+    <div class="loading-progress" id="progress"></div>
+    </div>
+
+    <div class="percent" id="percent">اكتمل التحميل</div>
+
+    <button class="start-btn Wave-cloud" id="startBtn" style="display: none;">ابدأ</button>
+
+    </div>
+
+</div>
 
     <script src="script dtat.js"></script>
     <script src="script.js"></script>
