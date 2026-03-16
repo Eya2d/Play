@@ -2,7 +2,8 @@
   "name": "لعبة الطائرة",
   "short_name": "لعبة الطائرة",
   "start_url": "/",
-  "display": "standalone",
+  "scope": "/",
+  "display": "fullscreen",
   "orientation": "landscape",
   "background_color": "#0e3066",
   "theme_color": "#0e3066"
