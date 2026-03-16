@@ -516,8 +516,7 @@ function hideAllScreens() {
     resultScreen.style.display = "none";
 }
 
-// تحميل البيانات المحفوظة (مُعدل)
-// تحميل البيانات المحفوظة (معدل لدعم GIF)
+// تحميل البيانات المحفوظة (مُعدل لدعم الهاتف)
 function loadGameData() {
     const savedData = localStorage.getItem('airplaneGameData');
     if (savedData) {
@@ -529,7 +528,14 @@ function loadGameData() {
         currentPlane = data.currentPlane || currentPlane;
         currentBullet = data.currentBullet || currentBullet;
         currentShootSpeed = data.currentShootSpeed || currentShootSpeed;
-        autoShootEnabled = data.autoShootEnabled !== undefined ? data.autoShootEnabled : true;
+        
+        // على الهاتف، الإطلاق التلقائي مفعل دائماً
+        if (window.innerWidth <= 1000) {
+            autoShootEnabled = true;
+        } else {
+            autoShootEnabled = data.autoShootEnabled !== undefined ? data.autoShootEnabled : true;
+        }
+        
         verticalMovementEnabled = data.verticalMovementEnabled !== undefined ? data.verticalMovementEnabled : true;
         planeRotationEnabled = data.planeRotationEnabled !== undefined ? data.planeRotationEnabled : true;
         ownedBackgrounds = data.ownedBackgrounds || ownedBackgrounds;
@@ -562,8 +568,15 @@ function loadGameData() {
         // تحديث العملات فقط - لا نقوم بتحديث الأقسام لأنها لم تظهر بعد
         updateCoinsDisplay();
         
-        // تحديث الإعدادات
-        autoShootCheckbox.checked = autoShootEnabled;
+        // تحديث الإعدادات مع مراعاة وضع الهاتف
+        if (window.innerWidth <= 1000) {
+            autoShootCheckbox.checked = true;
+            autoShootCheckbox.disabled = true; // تعطيل الإدخال على الهاتف
+        } else {
+            autoShootCheckbox.checked = autoShootEnabled;
+            autoShootCheckbox.disabled = false; // تمكين الإدخال على الكمبيوتر
+        }
+        
         verticalMovementCheckbox.checked = verticalMovementEnabled;
         planeRotationCheckbox.checked = planeRotationEnabled;
         
@@ -577,6 +590,13 @@ function loadGameData() {
         
         // تطبيق الخلفية الحالية
         applyBackground(currentBackground);
+    } else {
+        // إذا لم تكن هناك بيانات محفوظة، نطبق إعدادات الهاتف الافتراضية
+        if (window.innerWidth <= 1000) {
+            autoShootEnabled = true;
+            autoShootCheckbox.checked = true;
+            autoShootCheckbox.disabled = true;
+        }
     }
 }
 
@@ -776,7 +796,7 @@ document.addEventListener("keydown", e => {
 });
 
 // ===============================
-// 🔵 نظام التحكم بالدائرة (للأجهزة المحمولة) - مع دوران الطائرة
+// 🔵 نظام التحكم بالدائرة (للأجهزة المحمولة) - مع دوران الطائرة (معدل السرعة)
 // ===============================
 // إنشاء عناصر دائرة التحكم
 function createControlCircle() {
@@ -841,14 +861,14 @@ if (window.innerWidth <= 1000) {
         // تحريك الطائرة بسلاسة إذا كانت اللعبة تعمل
         if (!paused) {
             if (isDragging) {
-                // تحريك الطائرة بسرعة متوسطة (0.6 بدلاً من 0.3)
-                planeX += (targetX * 0.6 - (targetX - currentX) * 0.1);
+                // تحريك الطائرة ببطء (0.3 بدلاً من 0.6)
+                planeX += (targetX * 0.3 - (targetX - currentX) * 0.1);
                 
                 // تطبيق الحركة العمودية مع حد أقصى 50 بكسل
-                let newPlaneY = planeY - (targetY * 0.6 - (targetY - currentY) * 0.1);
+                let newPlaneY = planeY - (targetY * 0.3 - (targetY - currentY) * 0.1);
                 
                 // تحديد الحد الأقصى للحركة العمودية (50 بكسل من الأسفل)
-                const maxPlaneYMobile = 150; // الحد الأقصى للحركة للأعلى على الهاتف
+                const maxPlaneYMobile = 50; // الحد الأقصى للحركة للأعلى على الهاتف
                 if (newPlaneY < minPlaneY) {
                     planeY = minPlaneY;
                 } else if (newPlaneY > maxPlaneYMobile) {
@@ -1345,7 +1365,7 @@ function addCoins(amount) {
 }
 
 // ===============================
-// ⚙️ وظائف الإعدادات الجديدة
+// ⚙️ وظائف الإعدادات الجديدة (معدلة لدعم الهاتف)
 // ===============================
 // فتح شاشة الإعدادات (معدل)
 settingsBtn.addEventListener("click", () => {
@@ -1353,17 +1373,35 @@ settingsBtn.addEventListener("click", () => {
     settingsScreen.style.display = "flex";
     paused = true;
     pauseBtn.textContent = "▶ استئناف";
+    
+    // التحقق من وضع الهاتف وتعيين حالة الإطلاق التلقائي
+    if (window.innerWidth <= 1000) {
+        autoShootCheckbox.checked = true;
+        autoShootEnabled = true;
+        autoShootCheckbox.disabled = true; // تعطيل الإدخال على الهاتف
+    } else {
+        autoShootCheckbox.disabled = false; // تمكين الإدخال على الكمبيوتر
+    }
 });
+
 // إغلاق شاشة الإعدادات - لا يتم استئناف اللعبة تلقائيًا
 closeSettingsBtn.addEventListener("click", () => {
     settingsScreen.style.display = "none";
     // لا نقوم بتغيير حالة paused هنا، يبقى على المستخدم النقر على زر الإيقاف
 });
-// التحكم في الإطلاق التلقائي
+
+// التحكم في الإطلاق التلقائي (معدل لدعم الهاتف)
 autoShootCheckbox.addEventListener("change", function() {
-    autoShootEnabled = this.checked;
+    // على الهاتف، الإطلاق التلقائي مفعل دائماً ولا يمكن تغييره
+    if (window.innerWidth <= 1000) {
+        this.checked = true;
+        autoShootEnabled = true;
+    } else {
+        autoShootEnabled = this.checked;
+    }
     saveGameData(); // حفظ الإعدادات
 });
+
 // التحكم في حركة الأسهم العمودية
 verticalMovementCheckbox.addEventListener("change", function() {
     verticalMovementEnabled = this.checked;
@@ -1374,6 +1412,7 @@ verticalMovementCheckbox.addEventListener("change", function() {
         isReturningToBottom = true;
     }
 });
+
 // التحكم في دوران الطائرة
 planeRotationCheckbox.addEventListener("change", function() {
     planeRotationEnabled = this.checked;
@@ -1384,6 +1423,7 @@ planeRotationCheckbox.addEventListener("change", function() {
         isReturningToStraight = true;
     }
 });
+
 // ===============================
 // 🗑️ وظائف نافذة حذف الذاكرة (مُعدلة)
 // ===============================
@@ -1551,7 +1591,14 @@ function restoreFromLink(link) {
         currentPlane = data.currentPlane ?? currentPlane;
         currentBullet = data.currentBullet ?? currentBullet;
         currentShootSpeed = data.currentShootSpeed ?? currentShootSpeed;
-        autoShootEnabled = data.autoShootEnabled ?? autoShootEnabled;
+        
+        // على الهاتف، الإطلاق التلقائي مفعل دائماً
+        if (window.innerWidth <= 1000) {
+            autoShootEnabled = true;
+        } else {
+            autoShootEnabled = data.autoShootEnabled ?? autoShootEnabled;
+        }
+        
         verticalMovementEnabled = data.verticalMovementEnabled ?? verticalMovementEnabled;
         planeRotationEnabled = data.planeRotationEnabled ?? planeRotationEnabled;
         ownedBackgrounds = data.ownedBackgrounds ?? ownedBackgrounds;
@@ -1572,8 +1619,14 @@ function restoreFromLink(link) {
         updateCoinsDisplay();
         applyBackground(currentBackground);
         
-        // تحديث الإعدادات
-        autoShootCheckbox.checked = autoShootEnabled;
+        // تحديث الإعدادات مع مراعاة وضع الهاتف
+        if (window.innerWidth <= 1000) {
+            autoShootCheckbox.checked = true;
+            autoShootCheckbox.disabled = true;
+        } else {
+            autoShootCheckbox.checked = autoShootEnabled;
+            autoShootCheckbox.disabled = false;
+        }
         verticalMovementCheckbox.checked = verticalMovementEnabled;
         planeRotationCheckbox.checked = planeRotationEnabled;
         
