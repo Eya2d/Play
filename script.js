@@ -777,7 +777,7 @@ document.addEventListener("keydown", e => {
 
 // ===============================
 // 🔥 تحريك الطائرة باللمس للهاتف (الأصلي)
-// يعمل فقط تحت 768px
+// يعمل فقط تحت 1000px
 // ===============================
 if (window.innerWidth <= 1000) {
     let touchStartX = 0;
@@ -828,7 +828,7 @@ if (window.innerWidth <= 1000) {
 }
 
 // ===============================
-// 🔵 نظام التحكم بالدائرة (للأجهزة المحمولة) - إضافة جديدة
+// 🔵 نظام التحكم بالدائرة (للأجهزة المحمولة) - نسخة بطيئة مع أنميشن
 // ===============================
 // إنشاء عناصر دائرة التحكم
 function createControlCircle() {
@@ -865,7 +865,50 @@ if (window.innerWidth <= 1000) {
     let isDragging = false;
     let startX = 0;
     let startY = 0;
+    let targetX = 0;
+    let targetY = 0;
+    let currentX = 0;
+    let currentY = 0;
+    let animationFrame = null;
     const maxDistance = 30; // أقصى مسافة يمكن سحب الدائرة
+    
+    // دالة الأنميشن السلس
+    function smoothMove() {
+        if (!isDragging && currentX === 0 && currentY === 0) {
+            if (animationFrame) {
+                cancelAnimationFrame(animationFrame);
+                animationFrame = null;
+            }
+            return;
+        }
+        
+        // تحريك الدائرة بسلاسة
+        currentX += (targetX - currentX) * 0.2;
+        currentY += (targetY - currentY) * 0.2;
+        
+        controlCircle.style.left = `calc(50% + ${currentX}px)`;
+        controlCircle.style.top = `calc(50% + ${currentY}px)`;
+        controlCircle.style.transform = 'translate(-50%, -50%)';
+        
+        // تحريك الطائرة بسلاسة إذا كانت اللعبة تعمل
+        if (!paused && isDragging) {
+            // تحريك الطائرة ببطء شديد (0.3 بدلاً من 0.7)
+            planeX += (targetX * 0.3 - (targetX - currentX) * 0.1);
+            planeY -= (targetY * 0.3 - (targetY - currentY) * 0.1);
+            
+            // تطبيق الحدود
+            if (planeX < 0) planeX = 0;
+            if (planeX > window.innerWidth - 70) planeX = window.innerWidth - 70;
+            if (planeY < minPlaneY) planeY = minPlaneY;
+            if (planeY > maxPlaneY) planeY = maxPlaneY;
+            
+            // تطبيق الموضع الجديد للطائرة
+            plane.style.left = planeX + 'px';
+            plane.style.bottom = planeY + 'px';
+        }
+        
+        animationFrame = requestAnimationFrame(smoothMove);
+    }
     
     // أحداث اللمس للدائرة
     controlCircle.addEventListener('touchstart', (e) => {
@@ -884,6 +927,11 @@ if (window.innerWidth <= 1000) {
             controlCircle.style.left = '50%';
             controlCircle.style.top = '50%';
             controlCircle.style.transform = 'translate(-50%, -50%)';
+        }
+        
+        // بدء الأنميشن
+        if (!animationFrame) {
+            animationFrame = requestAnimationFrame(smoothMove);
         }
     });
     
@@ -905,31 +953,9 @@ if (window.innerWidth <= 1000) {
             deltaY = Math.sin(angle) * maxDistance;
         }
         
-        // تحريك الدائرة
-        controlCircle.style.left = `calc(50% + ${deltaX}px)`;
-        controlCircle.style.top = `calc(50% + ${deltaY}px)`;
-        controlCircle.style.transform = 'translate(-50%, -50%)';
-        
-        // حساب حركة الطائرة بناءً على سحب الدائرة
-        // تم تعديل السرعة من 2 إلى 0.8 لجعل الحركة أبطأ وأكثر تحكماً
-        const moveX = deltaX * 0.8; // تقليل السرعة
-        const moveY = deltaY * 0.8; // تقليل السرعة
-        
-        // تحديث موقع الطائرة
-        if (!paused) {
-            planeX += moveX;
-            planeY -= moveY; // سالب لأن الاتجاه معكوس (الدائرة للأسفل = الطائرة للأعلى)
-            
-            // تطبيق الحدود
-            if (planeX < 0) planeX = 0;
-            if (planeX > window.innerWidth - 70) planeX = window.innerWidth - 70;
-            if (planeY < minPlaneY) planeY = minPlaneY;
-            if (planeY > maxPlaneY) planeY = maxPlaneY;
-            
-            // تطبيق الموضع الجديد للطائرة
-            plane.style.left = planeX + 'px';
-            plane.style.bottom = planeY + 'px';
-        }
+        // تحديث الهدف
+        targetX = deltaX;
+        targetY = deltaY;
     });
     
     controlCircle.addEventListener('touchend', (e) => {
@@ -939,16 +965,9 @@ if (window.innerWidth <= 1000) {
         isDragging = false;
         controlCircle.classList.remove('dragging');
         
-        // إعادة الدائرة إلى المركز
-        controlCircle.style.left = '50%';
-        controlCircle.style.top = '50%';
-        controlCircle.style.transform = 'translate(-50%, -50%)';
-        controlCircle.style.transition = 'all 0.3s ease';
-        
-        // إزالة الانتقال بعد الانتهاء
-        setTimeout(() => {
-            controlCircle.style.transition = '';
-        }, 300);
+        // إعادة الهدف إلى المركز
+        targetX = 0;
+        targetY = 0;
     });
     
     // منع التداخل مع السحب العادي للصفحة
@@ -958,9 +977,8 @@ if (window.innerWidth <= 1000) {
         
         isDragging = false;
         controlCircle.classList.remove('dragging');
-        controlCircle.style.left = '50%';
-        controlCircle.style.top = '50%';
-        controlCircle.style.transform = 'translate(-50%, -50%)';
+        targetX = 0;
+        targetY = 0;
     });
     
     // إضافة دعم للفأرة للتجربة على الكمبيوتر
@@ -978,6 +996,11 @@ if (window.innerWidth <= 1000) {
             controlCircle.style.top = '50%';
             controlCircle.style.transform = 'translate(-50%, -50%)';
         }
+        
+        // بدء الأنميشن
+        if (!animationFrame) {
+            animationFrame = requestAnimationFrame(smoothMove);
+        }
     });
     
     document.addEventListener('mousemove', (e) => {
@@ -994,23 +1017,8 @@ if (window.innerWidth <= 1000) {
             deltaY = Math.sin(angle) * maxDistance;
         }
         
-        controlCircle.style.left = `calc(50% + ${deltaX}px)`;
-        controlCircle.style.top = `calc(50% + ${deltaY}px)`;
-        controlCircle.style.transform = 'translate(-50%, -50%)';
-        
-        if (!paused) {
-            // تم تعديل السرعة هنا أيضاً
-            planeX += deltaX * 0.8; // تقليل السرعة
-            planeY -= deltaY * 0.8; // تقليل السرعة
-            
-            if (planeX < 0) planeX = 0;
-            if (planeX > window.innerWidth - 70) planeX = window.innerWidth - 70;
-            if (planeY < minPlaneY) planeY = minPlaneY;
-            if (planeY > maxPlaneY) planeY = maxPlaneY;
-            
-            plane.style.left = planeX + 'px';
-            plane.style.bottom = planeY + 'px';
-        }
+        targetX = deltaX;
+        targetY = deltaY;
     });
     
     document.addEventListener('mouseup', (e) => {
@@ -1018,15 +1026,8 @@ if (window.innerWidth <= 1000) {
         
         isDragging = false;
         controlCircle.classList.remove('dragging');
-        
-        controlCircle.style.left = '50%';
-        controlCircle.style.top = '50%';
-        controlCircle.style.transform = 'translate(-50%, -50%)';
-        controlCircle.style.transition = 'all 0.3s ease';
-        
-        setTimeout(() => {
-            controlCircle.style.transition = '';
-        }, 300);
+        targetX = 0;
+        targetY = 0;
     });
 }
 
