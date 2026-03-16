@@ -703,10 +703,10 @@ xxd label {
 
 /* تأثير عند السحب */
 .control-circle-inner.dragging {
-    background: rgba(76, 175, 80, 0.9);
+    background: rgba(57, 143, 255, 0.9);
     color: white;
     border-color: white;
-    box-shadow: 0 0 30px #4CAF50;
+    box-shadow: none;
 }
 
 /* أيقونة الطائرة داخل الدائرة */
