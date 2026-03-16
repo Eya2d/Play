@@ -776,154 +776,6 @@ document.addEventListener("keydown", e => {
 });
 
 // ===============================
-// 🔥 تم إيقاف تحريك الطائرة باللمس المباشر على الشاشة
-// ===============================
-// تم إزالة كود تحريك الطائرة باللمس المباشر والاكتفاء بالدائرة
-
-// ===============================
-// 📱 نظام التحكم بإمالة الهاتف (الجيروسكوب)
-// ===============================
-let gyroscopeEnabled = false;
-let initialBeta = null; // الزاوية الأمامية/الخلفية
-let initialGamma = null; // الزاوية اليسار/اليمين
-let gyroscopeActive = false;
-
-// طلب إذن الجيروسكوب للأجهزة التي تتطلب ذلك (مثل iOS 13+)
-function requestGyroscopePermission() {
-    if (typeof DeviceOrientationEvent !== 'undefined' && typeof DeviceOrientationEvent.requestPermission === 'function') {
-        // للأجهزة التي تتطلب إذناً (iOS)
-        DeviceOrientationEvent.requestPermission()
-            .then(permissionState => {
-                if (permissionState === 'granted') {
-                    enableGyroscope();
-                } else {
-                    console.log("لم يتم منح إذن الجيروسكوب");
-                }
-            })
-            .catch(console.error);
-    } else {
-        // للأجهزة التي لا تتطلب إذناً
-        enableGyroscope();
-    }
-}
-
-function enableGyroscope() {
-    if (window.DeviceOrientationEvent) {
-        window.addEventListener('deviceorientation', handleOrientation);
-        gyroscopeEnabled = true;
-        showNotification("📱 تم تفعيل التحكم بإمالة الهاتف");
-        console.log("الجيروسكوب مفعل");
-    } else {
-        console.log("جهازك لا يدعم الجيروسكوب");
-        showNotification("❌ جهازك لا يدعم التحكم بالإمالة");
-    }
-}
-
-function handleOrientation(event) {
-    // تفعيل الجيروسكوب فقط على الأجهزة المحمولة وعندما تكون اللعبة غير متوقفة
-    if (window.innerWidth > 1000 || paused || !planeRotationEnabled) return;
-    
-    // beta: الزاوية الأمامية/الخلفية (0 إلى 360) - نستخدمها للحركة العمودية
-    // gamma: الزاوية اليسار/اليمين (-90 إلى 90) - نستخدمها للحركة الأفقية والدوران
-    
-    let beta = event.beta; // الزاوية الأمامية/الخلفية
-    let gamma = event.gamma; // الزاوية اليسار/اليمين
-    
-    // تجاهل القيم غير الصالحة
-    if (beta === null || gamma === null) return;
-    
-    // تسجيل القيم الأولية عند بدء التشغيل
-    if (initialBeta === null) {
-        initialBeta = beta;
-        initialGamma = gamma;
-        return;
-    }
-    
-    // حساب الفرق من الوضع الأولي
-    let deltaGamma = gamma - initialGamma;
-    let deltaBeta = beta - initialBeta;
-    
-    // تطبيق حساسية مناسبة (تصغير الحركة)
-    const sensitivity = 0.3;
-    let moveX = deltaGamma * sensitivity;
-    let moveY = -deltaBeta * sensitivity; // عكس الاتجاه لجعل إمالة الهاتف للأمام تحرك الطائرة للأعلى
-    
-    // تحديث موقع الطائرة
-    planeX += moveX;
-    planeY += moveY;
-    
-    // تطبيق الحدود
-    if (planeX < 0) planeX = 0;
-    if (planeX > window.innerWidth - 70) planeX = window.innerWidth - 70;
-    if (planeY < minPlaneY) planeY = minPlaneY;
-    if (planeY > maxPlaneY) planeY = maxPlaneY;
-    
-    // تطبيق الموضع الجديد للطائرة
-    plane.style.left = planeX + 'px';
-    plane.style.bottom = planeY + 'px';
-    
-    // تدوير الطائرة بناءً على إمالة الهاتف يميناً ويساراً
-    if (planeRotationEnabled) {
-        const maxRotation = 20; // أقصى زاوية دوران
-        // تحويل gamma إلى زاوية دوران (من -20 إلى 20)
-        let rotationAngle = (gamma / 90) * maxRotation;
-        
-        // تطبيق الدوران مع الحفاظ على النطاق
-        if (rotationAngle > maxRotation) rotationAngle = maxRotation;
-        if (rotationAngle < -maxRotation) rotationAngle = -maxRotation;
-        
-        currentPlaneRotation = -rotationAngle; // سالب لجعل الدوران طبيعياً
-        plane.style.transform = `translateX(-50%) rotate(${currentPlaneRotation}deg)`;
-    }
-}
-
-// زر لتفعيل/إيقاف الجيروسكوب (يمكن إضافته في الإعدادات)
-const gyroscopeToggle = document.createElement("button");
-gyroscopeToggle.id = "gyroscopeToggle";
-gyroscopeToggle.className = "gyroscope-btn";
-gyroscopeToggle.textContent = "📱 تفعيل التحكم بالإمالة";
-gyroscopeToggle.style.cssText = `
-    position: fixed;
-    bottom: 20px;
-    right: 20px;
-    z-index: 1000;
-    padding: 10px 20px;
-    background: #4CAF50;
-    color: white;
-    border: none;
-    border-radius: 25px;
-    font-size: 16px;
-    cursor: pointer;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.3);
-    display: none;
-`;
-
-// إظهار زر الجيروسكوب فقط على الأجهزة المحمولة
-if (window.innerWidth <= 1000) {
-    document.body.appendChild(gyroscopeToggle);
-    gyroscopeToggle.style.display = "block";
-    
-    gyroscopeToggle.addEventListener("click", () => {
-        if (!gyroscopeEnabled) {
-            requestGyroscopePermission();
-            gyroscopeToggle.textContent = "📱 إيقاف التحكم بالإمالة";
-            gyroscopeToggle.style.background = "#f44336";
-        } else {
-            // إيقاف الجيروسكوب
-            if (window.DeviceOrientationEvent) {
-                window.removeEventListener('deviceorientation', handleOrientation);
-            }
-            gyroscopeEnabled = false;
-            initialBeta = null;
-            initialGamma = null;
-            gyroscopeToggle.textContent = "📱 تفعيل التحكم بالإمالة";
-            gyroscopeToggle.style.background = "#4CAF50";
-            showNotification("📱 تم إيقاف التحكم بالإمالة");
-        }
-    });
-}
-
-// ===============================
 // 🔵 نظام التحكم بالدائرة (للأجهزة المحمولة) - مع دوران الطائرة
 // ===============================
 // إنشاء عناصر دائرة التحكم
@@ -1007,24 +859,22 @@ if (window.innerWidth <= 1000) {
             // ===============================
             // ✈️ تدوير الطائرة بناءً على اتجاه السحب
             // ===============================
-            if (planeRotationEnabled && isDragging) {
-                if (Math.abs(targetX) > 1) {
+            if (planeRotationEnabled) {
+                if (isDragging && Math.abs(targetX) > 1) {
                     // حساب زاوية الدوران بناءً على مقدار السحب الأفقي
                     const maxRotation = 20; // أقصى زاوية دوران (درجة)
                     const rotationFactor = (targetX / maxDistance) * maxRotation;
                     currentPlaneRotation = -rotationFactor; // سالب لجعل الدوران طبيعياً
+                } else {
+                    // عند عدم السحب أو السحب قليل جداً، عد تدريجياً إلى 0
+                    if (currentPlaneRotation > 0) {
+                        currentPlaneRotation = Math.max(0, currentPlaneRotation - returnSpeed);
+                    } else if (currentPlaneRotation < 0) {
+                        currentPlaneRotation = Math.min(0, currentPlaneRotation + returnSpeed);
+                    }
                 }
-            } else if (!gyroscopeEnabled) {
-                // عند عدم السحب وعدم تفعيل الجيروسكوب، عد تدريجياً إلى 0
-                if (currentPlaneRotation > 0) {
-                    currentPlaneRotation = Math.max(0, currentPlaneRotation - returnSpeed);
-                } else if (currentPlaneRotation < 0) {
-                    currentPlaneRotation = Math.min(0, currentPlaneRotation + returnSpeed);
-                }
-            }
-            
-            // تطبيق الدوران على الطائرة (إذا لم يكن الجيروسكوب مفعلاً)
-            if (!gyroscopeEnabled) {
+                
+                // تطبيق الدوران على الطائرة
                 plane.style.transform = `translateX(-50%) rotate(${currentPlaneRotation}deg)`;
             }
         }
@@ -1887,7 +1737,7 @@ function gameLoop() {
         }
         
         // تطبيق دوران الطائرة إذا كان مفعلاً
-        if (planeRotationEnabled && !gyroscopeEnabled) {
+        if (planeRotationEnabled) {
             if (keys["ArrowLeft"]) {
                 currentPlaneRotation = -15;
                 isReturningToStraight = false;
@@ -1907,7 +1757,7 @@ function gameLoop() {
                     }
                 }
             }
-        } else if (!gyroscopeEnabled) {
+        } else {
             // إذا تم إيقاف خيار الدوران، نعيد الطائرة للوضع المستقيم تدريجياً
             if (currentPlaneRotation !== 0) {
                 isReturningToStraight = true;
@@ -1933,10 +1783,8 @@ function gameLoop() {
         plane.style.left = planeX + "px";
         plane.style.bottom = planeY + "px";
         
-        // تطبيق دوران الطائرة (إذا لم يكن الجيروسكوب مفعلاً)
-        if (!gyroscopeEnabled) {
-            plane.style.transform = `translateX(-50%) rotate(${currentPlaneRotation}deg)`;
-        }
+        // تطبيق دوران الطائرة
+        plane.style.transform = `translateX(-50%) rotate(${currentPlaneRotation}deg)`;
         
         // استدعاء دالة الإطلاق للتحقق من الإطلاق التلقائي أو اليدوي
         autoShoot();
