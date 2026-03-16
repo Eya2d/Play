@@ -711,7 +711,7 @@ xxd label {
 
 /* أيقونة الطائرة داخل الدائرة */
 .control-circle-inner::before {
-    content: "✈️";
+    content: "";
     font-size: 24px;
 }
 
@@ -730,26 +730,6 @@ xxd label {
 .direction-dot.left { left: 15px; top: 50%; transform: translateY(-50%); }
 .direction-dot.right { right: 15px; top: 50%; transform: translateY(-50%); }
 
-/* تلميح للسحب */
-.drag-hint {
-    position: absolute;
-    top: -30px;
-    left: 50%;
-    transform: translateX(-50%);
-    color: white;
-    background: rgba(0, 0, 0, 0.6);
-    padding: 4px 10px;
-    border-radius: 20px;
-    font-size: 12px;
-    white-space: nowrap;
-    opacity: 0;
-    transition: opacity 0.3s ease;
-}
-
-.control-circle-container:hover .drag-hint {
-    opacity: 1;
-}
-
 /* تفعيل الدائرة فقط للأجهزة المحمولة */
 @media (max-width: 1000px) {
     .control-circle-container {
@@ -767,7 +747,7 @@ xxd label {
     .control-circle-inner {
         background: rgba(50, 50, 50, 0.9);
         color: white;
-        border-color: #4CAF50;
+        border-color: #8891c3;
     }
 }
 
