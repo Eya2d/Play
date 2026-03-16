@@ -751,7 +751,7 @@ xxd label {
 }
 
 /* تفعيل الدائرة فقط للأجهزة المحمولة */
-@media (max-width: 768px) {
+@media (max-width: 1000px) {
     .control-circle-container {
         display: block;
     }
