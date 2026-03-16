@@ -841,15 +841,25 @@ if (window.innerWidth <= 1000) {
         // تحريك الطائرة بسلاسة إذا كانت اللعبة تعمل
         if (!paused) {
             if (isDragging) {
-                // تحريك الطائرة ببطء شديد
-                planeX += (targetX * 0.3 - (targetX - currentX) * 0.1);
-                planeY -= (targetY * 0.3 - (targetY - currentY) * 0.1);
+                // تحريك الطائرة بسرعة متوسطة (0.6 بدلاً من 0.3)
+                planeX += (targetX * 0.6 - (targetX - currentX) * 0.1);
                 
-                // تطبيق الحدود
+                // تطبيق الحركة العمودية مع حد أقصى 50 بكسل
+                let newPlaneY = planeY - (targetY * 0.6 - (targetY - currentY) * 0.1);
+                
+                // تحديد الحد الأقصى للحركة العمودية (50 بكسل من الأسفل)
+                const maxPlaneYMobile = 80; // الحد الأقصى للحركة للأعلى على الهاتف
+                if (newPlaneY < minPlaneY) {
+                    planeY = minPlaneY;
+                } else if (newPlaneY > maxPlaneYMobile) {
+                    planeY = maxPlaneYMobile;
+                } else {
+                    planeY = newPlaneY;
+                }
+                
+                // تطبيق الحدود الأفقية
                 if (planeX < 0) planeX = 0;
                 if (planeX > window.innerWidth - 70) planeX = window.innerWidth - 70;
-                if (planeY < minPlaneY) planeY = minPlaneY;
-                if (planeY > maxPlaneY) planeY = maxPlaneY;
                 
                 // تطبيق الموضع الجديد للطائرة
                 plane.style.left = planeX + 'px';
