@@ -776,59 +776,105 @@ document.addEventListener("keydown", e => {
 });
 
 // ===============================
-// 🔥 تحريك الطائرة باللمس للهاتف (الأصلي)
-// يعمل فقط تحت 1000px
+// ❌ تم إزالة التحريك عبر اللمس المباشر (تم استبداله بالإمالة)
+// ===============================
+
+// ===============================
+// 📱 التحريك عبر إمالة الهاتف (deviceorientation)
 // ===============================
 if (window.innerWidth <= 1000) {
-    let touchStartX = 0;
-    let touchStartY = 0;
-    game.addEventListener("touchstart", (e) => {
-        touchStartX = e.touches[0].clientX;
-        touchStartY = e.touches[0].clientY;
-    });
-    game.addEventListener("touchmove", (e) => {
-        if (paused) return;
-        let touchX = e.touches[0].clientX;
-        let touchY = e.touches[0].clientY;
-        let moveX = touchX - touchStartX;
-        let moveY = touchY - touchStartY;
-        planeX += moveX * 0.5; // حساسية الحركة الأفقية
-        planeY += moveY * 0.5; // حساسية الحركة العمودية - تم التصحيح هنا
-        touchStartX = touchX;
-        touchStartY = touchY;
-        
-        // تحديد حدود الحركة الأفقية
-        if (planeX < 0) planeX = 0;
-        if (planeX > window.innerWidth - 70) planeX = window.innerWidth - 70;
-        
-        // تحديد حدود الحركة العمودية (400px من الأسفل)
-        if (planeY < minPlaneY) planeY = minPlaneY;
-        if (planeY > maxPlaneY) planeY = maxPlaneY;
-        
-        plane.style.left = planeX + "px";
-        plane.style.bottom = planeY + "px";
-    });
+    let targetGamma = 0; // القيمة المستهدفة من الإمالة
+    let currentGamma = 0; // القيمة الحالية للحركة السلسة
+    let orientationAnimationFrame = null;
+    const orientationSpeed = 0.1; // سرعة الاستجابة (0.1 = بطيء وسلس)
+    const maxGamma = 30; // أقصى زاوية إمالة تؤثر (درجة)
     
-    // إضافة دعم للإطلاق باللمس للهواتف
-    let shootInterval;
-    game.addEventListener("touchstart", (e) => {
-        if (!autoShootEnabled && !paused) {
-            // بدء الإطلاق عند لمس الشاشة
-            shoot();
-            shootInterval = setInterval(() => {
-                if (!paused) shoot();
-            }, currentShootSpeed);
+    // دالة الحركة السلسة للإمالة
+    function smoothOrientation() {
+        if (!paused) {
+            // تحريك القيمة الحالية باتجاه الهدف
+            currentGamma += (targetGamma - currentGamma) * orientationSpeed;
+            
+            // تحويل زاوية الإمالة إلى حركة أفقية
+            // gamma تكون بين -90 و 90، نحولها إلى قيمة بين -1 و 1 ثم نضرب في أقصى حركة
+            let moveX = (currentGamma / maxGamma) * 10; // 10 بكسل لكل 30 درجة (يمكن تعديل الحساسية)
+            
+            // تطبيق الحركة
+            planeX += moveX;
+            
+            // تطبيق الحدود
+            if (planeX < 0) planeX = 0;
+            if (planeX > window.innerWidth - 70) planeX = window.innerWidth - 70;
+            
+            // تطبيق الموضع الجديد
+            plane.style.left = planeX + 'px';
+            
+            // دوران الطائرة بناءً على الإمالة (اختياري)
+            if (planeRotationEnabled) {
+                const maxRotation = 20;
+                currentPlaneRotation = -(currentGamma / maxGamma) * maxRotation;
+                plane.style.transform = `translateX(-50%) rotate(${currentPlaneRotation}deg)`;
+            }
         }
-    });
+        
+        orientationAnimationFrame = requestAnimationFrame(smoothOrientation);
+    }
     
-    game.addEventListener("touchend", () => {
-        // إيقاف الإطلاق عند رفع اللمس
-        clearInterval(shootInterval);
-    });
+    // بدء الحركة السلسة
+    smoothOrientation();
+    
+    // الاستماع لحدث إمالة الهاتف
+    if (window.DeviceOrientationEvent) {
+        // للمتصفحات التي تطلب الإذن (مثل iOS 13+)
+        if (typeof DeviceOrientationEvent.requestPermission === 'function') {
+            // نعرض زر لطلب الإذن (يمكن وضعه في واجهة المستخدم)
+            const requestPermissionBtn = document.createElement('button');
+            requestPermissionBtn.textContent = 'تفعيل التحريك بالإمالة';
+            requestPermissionBtn.style.position = 'fixed';
+            requestPermissionBtn.style.bottom = '100px';
+            requestPermissionBtn.style.left = '50%';
+            requestPermissionBtn.style.transform = 'translateX(-50%)';
+            requestPermissionBtn.style.zIndex = '10001';
+            requestPermissionBtn.style.padding = '10px 20px';
+            requestPermissionBtn.style.background = '#4CAF50';
+            requestPermissionBtn.style.color = '#fff';
+            requestPermissionBtn.style.border = 'none';
+            requestPermissionBtn.style.borderRadius = '5px';
+            requestPermissionBtn.style.fontSize = '16px';
+            requestPermissionBtn.style.cursor = 'pointer';
+            document.body.appendChild(requestPermissionBtn);
+            
+            requestPermissionBtn.addEventListener('click', () => {
+                DeviceOrientationEvent.requestPermission()
+                    .then(permissionState => {
+                        if (permissionState === 'granted') {
+                            window.addEventListener('deviceorientation', handleOrientation);
+                            requestPermissionBtn.remove();
+                        } else {
+                            alert('لم يتم منح الإذن لمستشعرات الحركة');
+                        }
+                    })
+                    .catch(console.error);
+            });
+        } else {
+            // للمتصفحات التي لا تطلب الإذن
+            window.addEventListener('deviceorientation', handleOrientation);
+        }
+    } else {
+        console.log('مستشعر الإمالة غير مدعوم في هذا الجهاز');
+    }
+    
+    function handleOrientation(event) {
+        // gamma: الإمالة لليسار واليمين (من -90 إلى 90)
+        if (event.gamma !== null) {
+            // تحديث الهدف بقيمة محدودة حسب maxGamma
+            targetGamma = Math.max(-maxGamma, Math.min(maxGamma, event.gamma));
+        }
+    }
 }
 
 // ===============================
-// 🔵 نظام التحكم بالدائرة (للأجهزة المحمولة) - نسخة بطيئة مع أنميشن
+// 🔵 نظام التحكم بالدائرة (للأجهزة المحمولة) - مع دوران الطائرة
 // ===============================
 // إنشاء عناصر دائرة التحكم
 function createControlCircle() {
@@ -891,20 +937,44 @@ if (window.innerWidth <= 1000) {
         controlCircle.style.transform = 'translate(-50%, -50%)';
         
         // تحريك الطائرة بسلاسة إذا كانت اللعبة تعمل
-        if (!paused && isDragging) {
-            // تحريك الطائرة ببطء شديد (0.3 بدلاً من 0.7)
-            planeX += (targetX * 0.3 - (targetX - currentX) * 0.1);
-            planeY -= (targetY * 0.3 - (targetY - currentY) * 0.1);
+        if (!paused) {
+            if (isDragging) {
+                // تحريك الطائرة ببطء شديد
+                planeX += (targetX * 0.3 - (targetX - currentX) * 0.1);
+                planeY -= (targetY * 0.3 - (targetY - currentY) * 0.1);
+                
+                // تطبيق الحدود
+                if (planeX < 0) planeX = 0;
+                if (planeX > window.innerWidth - 70) planeX = window.innerWidth - 70;
+                if (planeY < minPlaneY) planeY = minPlaneY;
+                if (planeY > maxPlaneY) planeY = maxPlaneY;
+                
+                // تطبيق الموضع الجديد للطائرة
+                plane.style.left = planeX + 'px';
+                plane.style.bottom = planeY + 'px';
+            }
             
-            // تطبيق الحدود
-            if (planeX < 0) planeX = 0;
-            if (planeX > window.innerWidth - 70) planeX = window.innerWidth - 70;
-            if (planeY < minPlaneY) planeY = minPlaneY;
-            if (planeY > maxPlaneY) planeY = maxPlaneY;
-            
-            // تطبيق الموضع الجديد للطائرة
-            plane.style.left = planeX + 'px';
-            plane.style.bottom = planeY + 'px';
+            // ===============================
+            // ✈️ تدوير الطائرة بناءً على اتجاه السحب
+            // ===============================
+            if (planeRotationEnabled) {
+                if (isDragging && Math.abs(targetX) > 1) {
+                    // حساب زاوية الدوران بناءً على مقدار السحب الأفقي
+                    const maxRotation = 20; // أقصى زاوية دوران (درجة)
+                    const rotationFactor = (targetX / maxDistance) * maxRotation;
+                    currentPlaneRotation = -rotationFactor; // سالب لجعل الدوران طبيعياً
+                } else {
+                    // عند عدم السحب أو السحب قليل جداً، عد تدريجياً إلى 0
+                    if (currentPlaneRotation > 0) {
+                        currentPlaneRotation = Math.max(0, currentPlaneRotation - returnSpeed);
+                    } else if (currentPlaneRotation < 0) {
+                        currentPlaneRotation = Math.min(0, currentPlaneRotation + returnSpeed);
+                    }
+                }
+                
+                // تطبيق الدوران على الطائرة
+                plane.style.transform = `translateX(-50%) rotate(${currentPlaneRotation}deg)`;
+            }
         }
         
         animationFrame = requestAnimationFrame(smoothMove);
