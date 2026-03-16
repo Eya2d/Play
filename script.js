@@ -855,7 +855,7 @@ function createControlCircle() {
 }
 
 // تفعيل دائرة التحكم فقط للأجهزة المحمولة
-if (window.innerWidth <= 768) {
+if (window.innerWidth <= 1000) {
     // إنشاء الدائرة
     createControlCircle();
     
