@@ -731,7 +731,7 @@ xxd label {
 .direction-dot.right { right: 15px; top: 50%; transform: translateY(-50%); }
 
 /* تفعيل الدائرة فقط للأجهزة المحمولة */
-@media (max-width: 900px) {
+@media (max-width: 950px) {
     .control-circle-container {
         display: block;
     }
