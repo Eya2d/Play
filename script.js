@@ -868,7 +868,7 @@ if (window.innerWidth <= 1000) {
                 let newPlaneY = planeY - (targetY * 0.3 - (targetY - currentY) * 0.1);
                 
                 // تحديد الحد الأقصى للحركة العمودية (50 بكسل من الأسفل)
-                const maxPlaneYMobile = 50; // الحد الأقصى للحركة للأعلى على الهاتف
+                const maxPlaneYMobile = 150; // الحد الأقصى للحركة للأعلى على الهاتف
                 if (newPlaneY < minPlaneY) {
                     planeY = minPlaneY;
                 } else if (newPlaneY > maxPlaneYMobile) {
