@@ -911,8 +911,9 @@ if (window.innerWidth <= 1000) {
         controlCircle.style.transform = 'translate(-50%, -50%)';
         
         // حساب حركة الطائرة بناءً على سحب الدائرة
-        const moveX = deltaX * 2; // مضاعفة الحركة للطائرة
-        const moveY = deltaY * 2; // مضاعفة الحركة للطائرة
+        // تم تعديل السرعة من 2 إلى 0.8 لجعل الحركة أبطأ وأكثر تحكماً
+        const moveX = deltaX * 0.8; // تقليل السرعة
+        const moveY = deltaY * 0.8; // تقليل السرعة
         
         // تحديث موقع الطائرة
         if (!paused) {
@@ -998,8 +999,9 @@ if (window.innerWidth <= 1000) {
         controlCircle.style.transform = 'translate(-50%, -50%)';
         
         if (!paused) {
-            planeX += deltaX * 2;
-            planeY -= deltaY * 2;
+            // تم تعديل السرعة هنا أيضاً
+            planeX += deltaX * 0.8; // تقليل السرعة
+            planeY -= deltaY * 0.8; // تقليل السرعة
             
             if (planeX < 0) planeX = 0;
             if (planeX > window.innerWidth - 70) planeX = window.innerWidth - 70;
