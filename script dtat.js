@@ -56,14 +56,34 @@ const planesData = [
         displayPrice: "6,000"
     },
     {
-    plane: "airplane8",
-    bullet: "bullets7.png",
-    price: 7500,           
-    speed: 90,                     
-    image: "image/Airplane/airplane8.png",
-    bulletImage: "image/bullets7.png",
-    displayPrice: "7,500",          
-    bulletOffset: 38
+        plane: "airplane8",
+        bullet: "bullets7.png",
+        price: 7500,           
+        speed: 90,                     
+        image: "image/Airplane/airplane8.png",
+        bulletImage: "image/bullets7.png",
+        displayPrice: "7,500",          
+        bulletOffset: 38
+    },
+    {
+        plane: "airplane9",
+        bullet: "bullets8.png",
+        price: 10000,           
+        speed: 90,                     
+        image: "image/Airplane/airplane9.png",
+        bulletImage: "image/bullets8.png",
+        displayPrice: "10,000",          
+        bulletOffset: 70
+    },
+    {
+        plane: "airplane10",
+        bullet: "bullets9.png",
+        price: 15700,           
+        speed: 90,                     
+        image: "image/Airplane/airplane10.png",
+        bulletImage: "image/bullets9.png",
+        displayPrice: "15,700",          
+        bulletOffset: 60
     }
 ];
 
