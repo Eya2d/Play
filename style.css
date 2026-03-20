@@ -601,6 +601,9 @@ xxd label {
     #Setting:active img {
         transform: rotate(23deg);
     }
+    .control-circle-container {
+        display: block !important;
+    }
 }
 
 @media (max-width: 800px) {
@@ -659,8 +662,8 @@ xxd label {
 /* حاوية دائرة التحكم */
 .control-circle-container {
     position: fixed;
-    bottom: 30px;
-    left: 30px;
+    bottom: 40px;
+    left: 40px;
     width: 120px;
     height: 120px;
     z-index: 1000;
@@ -732,9 +735,7 @@ xxd label {
 
 /* تفعيل الدائرة فقط للأجهزة المحمولة */
 @media (max-width: 1000px) {
-    .control-circle-container {
-        display: block;
-    }
+    
 }
 
 /* تحسين المظهر في الوضع الليلي إذا كان موجوداً */
