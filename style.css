@@ -776,11 +776,16 @@ xxd label {
 }
 
 .boxdr {
+    transition: ease 0.3s;
     position: absolute;
     bottom: 0;
     left: 0;
-    margin: 20px;
+    margin: 30px;
     cursor: pointer;
+}
+.boxdr:active {
+    transition: ease 0.1s;
+    transform: scale(0.90);
 }
 .boxdr img {
     height: 100px;
