@@ -141,7 +141,13 @@ const backgroundsData = [
         bg: "bg8",
         price: 4000,
         displayPrice: "4,000",
-        content: '<img src="image/img9.jpg" alt="">'
+        content: '<img src="image/il_570xN.6070561041_5ido.webp" alt="">'
+    },
+    {
+        bg: "bg9",
+        price: 5700,
+        displayPrice: "5,700",
+        content: '<img src="image/img10.gif" alt="">'
     }
 ];
 
