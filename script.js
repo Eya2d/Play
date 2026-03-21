@@ -1159,6 +1159,10 @@ function applyBackground(bgName) {
         game.style.backgroundImage = "url('image/img9.jpg')";
         game.style.backgroundSize = "cover";
         game.style.boxShadow = "none";
+    } else if (bgName === "bg9") {
+        game.style.backgroundImage = "url('image/img10.gif')";
+        game.style.backgroundSize = "cover";
+        game.style.boxShadow = "none";
     }
 }
 
@@ -1491,7 +1495,7 @@ confirmDeleteBtn.addEventListener("click", () => {
         
         // حذف البيانات المحددة
         if (deleteCoins) {
-            gameData.coins = 1700; // إعادة تعيين العملات إلى القيمة الافتراضية
+            gameData.coins = 10000; // إعادة تعيين العملات إلى القيمة الافتراضية
         }
         
         if (deletePlanes) {
